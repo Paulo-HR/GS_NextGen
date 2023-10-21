@@ -1,0 +1,331 @@
+---
+title: "5_Standard_K-fold_Cross_validation_additive_plus_dominance_effect"
+author: "Paulo-HR"
+date: "2023-10-21"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+##################
+#
+## Introduction
+#
+##################
+
+
+#######################
+#
+## Calling packages
+#
+#######################
+```{r}
+library(genomicMateSelectR)
+library(ggplot2)
+library(plyr)
+```
+
+
+##############################
+#
+## Importing phenotype data
+#
+###############################
+```{r}
+blups<-readRDS(here::here("output","blups_fixed_labels.rds"))
+```
+
+
+###############################
+#
+## Genomic relationship matrix
+#
+###############################
+```{r}
+## Dominance relationship matrix
+Dclassic<-readRDS(file=here::here("output","kinship_dom_classic.rds"))
+
+## Additive relationship matrix
+A<-readRDS(file=here::here("output","kinship_add.rds"))
+```
+
+########################################################
+#
+## Plotting off-diagonal values of the kinship matrix
+#
+########################################################
+```{r}
+hist(A[lower.tri(A)], main='Off-diagonal values (lower-triangle) of the kinship matrix')
+```
+
+
+#####################################################
+#
+## Plotting diagonal values of the kinship matrix
+#
+#####################################################
+```{r}
+hist(diag(A), main='Diagonals of the kinship', breaks=20)
+```
+
+
+############################
+#
+## Filtering by population
+#
+############################
+```{r}
+#    blups$blups[[1]]<-blups$blups[[1]] %>%  filter(POP=='C0')
+#    blups$blups[[2]]<-blups$blups[[2]] %>%  filter(POP=='C0')
+#    blups$blups[[3]]<-blups$blups[[3]] %>%  filter(POP=='C0')
+#    blups$blups[[4]]<-blups$blups[[4]] %>%  filter(POP=='C0')
+#    blups$blups[[5]]<-blups$blups[[5]] %>%  filter(POP=='C0')
+```
+
+
+############################################
+#
+## Sorting the data frame by germplasmName
+#
+############################################
+```{r}
+DMCg=blups$blups[[1]]
+DMCg=arrange(DMCg,germplasmName)
+
+CWLSD=blups$blups[[2]]
+CWLSD=arrange(CWLSD,germplasmName)
+
+CBroLS=blups$blups[[3]]
+CBroLS=arrange(CBroLS,germplasmName)
+
+CBliLS=blups$blups[[4]]
+CBliLS=arrange(CBliLS,germplasmName)
+
+StC=blups$blups[[5]]
+StC=arrange(StC,germplasmName)
+
+PA=blups$blups[[6]]
+PA=arrange(PA,germplasmName)
+
+logFRY=blups$blups[[7]]
+logFRY=arrange(logFRY,germplasmName)
+
+logFSY=blups$blups[[8]]
+logFSY=arrange(logFSY,germplasmName)
+```
+
+#########################################
+#
+## Combine all outputs into one object
+#
+########################################
+```{r}
+out_DMCg<-tibble(Trait='DMCg',blups=list(DMCg))
+out_CWLSD<-tibble(Trait='CWLSD',blups=list(CWLSD))
+out_CBroLS<-tibble(Trait='CBroLS',blups=list(CBroLS))
+out_CBliLS<-tibble(Trait='CBliLS',blups=list(CBliLS))
+out_StC<-tibble(Trait='StC',blups=list(StC))
+out_PA<-tibble(Trait='PA',blups=list(PA))
+out_logFRY<-tibble(Trait='logFRY',blups=list(logFRY))
+out_logFSY<-tibble(Trait='logFSY',blups=list(logFSY))
+```
+
+###############################################
+#
+## Combine all outputs into one object blups
+#
+###############################################
+```{r}
+blups<-out_DMCg
+blups<-blups%>%full_join(out_CWLSD)%>%full_join(out_CBroLS)%>%full_join(out_CBliLS)%>%full_join(out_StC)%>%full_join(out_PA)%>%full_join(out_logFRY)%>%full_join(out_logFSY)
+```
+
+
+#####################################
+#
+## Set-up for the cross-validation
+#
+#####################################
+```{r}
+blups %<>% 
+     # need to rename the "blups" list to comply with the runCrossVal function
+     dplyr::rename(TrainingData=blups) %>% 
+     dplyr::select(Trait,TrainingData) %>% 
+     # need also to remove phenotyped-but-not-genotyped lines
+     # couldn't hurt to also subset the kinship to only phenotyped lines... would save RAM
+     mutate(TrainingData=map(TrainingData,
+                             ~filter(.,germplasmName %in% rownames(A)) %>% 
+                                  # rename the germplasmName column to GID
+                                 dplyr::rename(GID=germplasmName)))
+```
+
+
+#####################################################################
+#
+## Deleting phenotyped-but-not-genotyped lines from kinship matrix
+#
+#####################################################################
+```{r}
+# For fastest, lightest compute of accuracy, remove non-phenotyped from kinship
+
+gids<-blups %>% 
+     unnest(TrainingData) %$% unique(GID)
+
+
+## Additive
+A<-A[gids,gids]
+A<-A[order(rownames(A)),order(colnames(A))]
+dim(A)
+
+## Dominance
+Dclassic<-Dclassic[gids,gids]
+Dclassic<-Dclassic[order(rownames(Dclassic)),order(colnames(Dclassic))]
+dim(Dclassic)
+```
+
+#####################################################################
+#
+## Deleting phenotyped-but-not-genotyped lines from kinship matrix
+#
+#####################################################################
+```{r}
+#A=subset(A,rownames(A)%in% gids)
+#A=A[order(rownames(A)), ]
+#A1=t(A)
+#A2=subset(A1,rownames(A1)%in% gids)
+#A2=A2[order(rownames(A2)),]
+#dim(A2)
+
+#Dclassic=subset(Dclassic,colnames(Dclassic)%in% gids)
+#Dclassic=Dclassic[order(rownames(Dclassic)), ]
+#Dclassic1=t(Dclassic)
+#Dclassic2=subset(Dclassic1,rownames(Dclassic1)%in% gids)
+#Dclassic2=Dclassic2[order(rownames(Dclassic2)), ]
+#dim(Dclassic2)
+```
+
+########################################################
+#
+## Constructing a genomic relationship matrix vector
+#
+########################################################
+```{r}
+grms<-list(A=A,Dclassic=Dclassic)
+```
+#######################
+#
+## Selection indices
+#
+#######################
+```{r}
+SIwts<-c(DMCg=5,
+         CWLSD=0,
+         CBroLS=0,
+         CBliLS=0,
+         StC=10,
+         PA=-8,
+         logFRY=10,
+         logFSY=8)
+SIwts
+```
+
+
+########################
+#
+## Cross-validation
+#
+########################
+```{r}
+starttime<-proc.time()[3]
+standardCV2<-runCrossVal(blups=blups,
+                        modelType="AD",
+                        selInd=TRUE,SIwts=SIwts,
+                        grms=list(A=grms[["A"]],
+                                  D=grms[["Dclassic"]]),
+                        nrepeats=50,nfolds=5,
+                        gid="GID",seed=424242,
+                        ncores=24)
+```
+
+
+#######################
+#
+## Saving the results
+#
+#######################
+```{r}
+saveRDS(standardCV2,file = here::here("output","standardCV_additive_plus_dominance.rds"))
+```
+
+############################
+#
+## Reading the results
+#
+############################
+```{r}
+predAS_AD<-readRDS(here::here("output","standardCV_additive_plus_dominance.rds"))
+```
+
+
+######################
+#
+## Plotting results
+#
+######################
+```{r}
+standardCV2 %>% 
+     unnest(accuracyEstOut) %>% 
+     dplyr::select(repeats,id,predOf,Trait,Accuracy) %>% 
+     filter(predOf=="GETGV") %>% 
+     mutate(Trait = factor(Trait, levels = c('DMCg','CWLSD','CBroLS','CBliLS','StC', 'PA', 'logFRY','logFSY','SELIND'))) %>%  
+     ggplot(.,aes(x=Trait,y=Accuracy,fill=Trait)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    scale_fill_manual(values=c("darkblue","firebrick","chartreuse4","darkturquoise","#E69F00","#FC4E07","mediumvioletred","#66CC99","#999999"))+
+     xlab('Group')+
+     scale_x_discrete(labels=c("DMCg" = "DMCg", "StC" = "StC", "PA"="PA", "logFRY"="FRY","logFSY"="FSY","SELIND"="SELIND"))+
+     #scale_y_continuous(limits=c(-0.2,0.8),breaks = c(-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8))+
+     theme(strip.text = element_text(hjust = -0, size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif",),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+```
+
+##############################################
+#
+## Data frame to estimate Accuracy average
+#
+##############################################
+```{r}
+AS_data=predAS_AD %>%
+        group_by(accuracyEstOut) %>%
+        unnest(accuracyEstOut)%>%
+        filter(predOf=="GETGV")
+```
+
+######################
+#
+## Accuracy average
+#
+######################
+```{r}
+AS_data1=na.omit(AS_data)
+AS=as.data.frame(ddply(AS_data1, "Trait", summarise, rating.mean=mean(Accuracy)))
+colnames(AS)=c("Trait"," AS")
+AS
+```
+
+
