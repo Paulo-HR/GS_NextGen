@@ -1,0 +1,13 @@
+
+VCFtools - 0.1.16
+(C) Adam Auton and Anthony Marcketta 2009
+
+Parameters as interpreted:
+	--vcf DCas22_6902_RefandStudyPopimputedAndFiltered.vcf
+	--recode
+	--stdout
+
+After filtering, kept 7827 out of 7827 Individuals
+Outputting VCF file...
+After filtering, kept 37877 out of a possible 37877 Sites
+Run Time = 178.00 seconds
