@@ -1,0 +1,38 @@
+---
+title: "Index"
+site: workflowr::workflow_site
+output:
+workflowr::wflow_html
+  toc: false
+  editor_options:
+    chunk_output_type: console
+---
+####################################
+#
+## Starting your workflowr project
+#
+####################################
+```{r}
+library(workflowr)
+
+wflow_git_config(user.name = "Paulo-HR", user.email = "paulohenriquerg@hotmail.com",overwrite = TRUE)
+```
+######################################
+#
+## Creating the workflowr directory
+#
+######################################
+```{r}
+wflow_start(directory = ".",
+          name = "Paulo-HR",
+          git = TRUE,
+          existing = TRUE)
+```
+##########################
+#
+## Creating new projects
+#
+##########################
+```{r}
+wflow_open("analysis/8_Predict_crosses_additive_effects.Rmd")
+```
