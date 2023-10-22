@@ -44,63 +44,6 @@ grms<-list(A=A)
 blups<-readRDS(here::here("output","blups_fixed_labels.rds"))
 ```
 
-############################################
-#
-## Sorting the data frame by germplasmName
-#
-############################################
-```{r}
-DMCg=blups$blups[[1]]
-DMCg=arrange(DMCg,germplasmName)
-
-CWLSD=blups$blups[[2]]
-CWLSD=arrange(CWLSD,germplasmName)
-
-CBroLS=blups$blups[[3]]
-CBroLS=arrange(CBroLS,germplasmName)
-
-CBliLS=blups$blups[[4]]
-CBliLS=arrange(CBliLS,germplasmName)
-
-StC=blups$blups[[5]]
-StC=arrange(StC,germplasmName)
-
-PA=blups$blups[[6]]
-PA=arrange(PA,germplasmName)
-
-logFRY=blups$blups[[7]]
-logFRY=arrange(logFRY,germplasmName)
-
-logFSY=blups$blups[[8]]
-logFSY=arrange(logFSY,germplasmName)
-```
-
-#########################################
-#
-## Combine all outputs into one object
-#
-########################################
-```{r}
-out_DMCg<-tibble(Trait='DMCg',blups=list(DMCg))
-out_CWLSD<-tibble(Trait='CWLSD',blups=list(CWLSD))
-out_CBroLS<-tibble(Trait='CBroLS',blups=list(CBroLS))
-out_CBliLS<-tibble(Trait='CBliLS',blups=list(CBliLS))
-out_StC<-tibble(Trait='StC',blups=list(StC))
-out_PA<-tibble(Trait='PA',blups=list(PA))
-out_logFRY<-tibble(Trait='logFRY',blups=list(logFRY))
-out_logFSY<-tibble(Trait='logFSY',blups=list(logFSY))
-```
-
-###############################################
-#
-## Combine all outputs into one object blups
-#
-###############################################
-```{r}
-blups<-out_DMCg
-blups<-blups%>%full_join(out_CWLSD)%>%full_join(out_CBroLS)%>%full_join(out_CBliLS)%>%full_join(out_StC)%>%full_join(out_PA)%>%full_join(out_logFRY)%>%full_join(out_logFSY)
-```
-
 ##########
 #
 ## Blups
@@ -116,6 +59,18 @@ blups %<>%
                              ~filter(.,germplasmName %in% rownames(grms$A)) %>% 
                                   # rename the germplasmName column to GID
                                   dplyr::rename(GID=germplasmName)))
+```
+
+############################################
+#
+## Sorting the data frame by germplasmName
+#
+############################################
+```{r}
+for(i in 1:nrow(blups)){
+blups$TrainingData[[i]] <- blups$TrainingData[[i]][order(blups$TrainingData[[i]]$GID),]
+}
+blups
 ```
 
 ###################
