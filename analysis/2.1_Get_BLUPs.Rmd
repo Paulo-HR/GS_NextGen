@@ -1520,7 +1520,8 @@ saveRDS(blups,file = here::here("output","blups.rds"))
 ###########################
 ```{r}
 # Change the number in square brackets according to the number of traits to correct all genotype names
-blups$blups[[1]][["germplasmName"]] <-  blups$blups[[1]][["germplasmName"]]%>%                                                                  plyr::revalue(c("01-Domingos-Martins"="X01.Domingos.Martins",
+for(i in 1:nrow(blups)){
+blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%                                                                   plyr::revalue(c("01-Domingos-Martins"="X01.Domingos.Martins",
 "03-DM"="X03.DM",
 "04-UFES"="X04.UFES",
 "05-Macaxeira"="X05.Macaxeira",
@@ -8950,6 +8951,7 @@ blups$blups[[1]][["germplasmName"]] <-  blups$blups[[1]][["germplasmName"]]%>%  
 "Uberlandia-3"="Uberlandia.3",
 "Vassourinha-branca"="Vassourinha.branca",
 "Vassourinha-CCAufes"="Vassourinha.CCAufes."))
+}
 ```
 
 #######################
