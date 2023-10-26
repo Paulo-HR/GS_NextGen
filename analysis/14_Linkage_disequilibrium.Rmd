@@ -1,0 +1,158 @@
+---
+title: "14_Linkage_disequilibrium"
+author: "Paulo-HR"
+date: "2023-10-25"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+##################
+#
+## Introduction
+#
+##################
+
+
+#######################
+#
+## Calling packages
+#
+#######################
+
+```{r}
+library(sommer)
+library(ggplot2)
+library(scales)
+```
+
+##################
+#
+## Dosage matrix
+#
+###################
+```{r}
+dosages<-read.delim(here::here("data","genotypes_coded_DL.txt"))
+dim(dosages)
+```
+
+####################
+#
+## Data frame map
+#
+####################
+```{r}
+mapCP<-read.delim(here::here("data","map_DL.txt"))
+mapCP$pos<- mapCP$pos/1000
+names(mapCP) <- c("Locus","Position","LG")
+head(mapCP)
+```
+
+####################################################
+#
+## with example purposes we only do 3 chromosomes
+#
+####################################################
+```{r}
+#mapCP <- mapCP[which(mapCP1$LG <= 3),]
+```
+
+#####################
+#
+## run the function
+#
+#####################
+```{r}
+res <- LD.decay(dosages, mapCP)
+```
+
+############################################
+#
+## subset only markers with significant LD 
+#
+############################################
+```{r}
+res_all<-res$all.LG[which(res$all.LG$p < .000001),]
+```
+
+###########################################
+#
+## plot the LD decay from all chromosomes
+#
+###########################################
+```{r}
+ggplot(res_all, aes(x=d, y=r2)) +
+   #geom_point(alpha=0.7, size=.3, shape=21, fill='grey30',colour='lightblue' ) +
+  geom_smooth(method = loess, se = FALSE,alpha=0.6)+
+  #scale_x_continuous(breaks = seq(0, 65000,500))+
+    xlab('Distance (Kb)') +
+  ylab(expression (paste ('', r^2, ''))) +
+  #ggtitle("Linkage Disequilibrium") +
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif",angle = 90, vjust = 0.5, hjust=1))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+```
+
+
+#############################################################
+#
+## subset only markers with significant LD by chromossome
+#
+#############################################################
+```{r}
+res1<-res$by.LG[[1]];res1<-res1[which(res1$p < .000001),];res1$Chr<-"1"
+res2<-res$by.LG[[2]];res2<-res2[which(res2$p < .000001),];res2$Chr<-"2"
+res3<-res$by.LG[[3]];res3<-res3[which(res3$p < .000001),];res3$Chr<-"3"
+res4<-res$by.LG[[4]];res4<-res4[which(res4$p < .000001),];res4$Chr<-"4"
+res5<-res$by.LG[[5]];res5<-res5[which(res5$p < .000001),];res5$Chr<-"5"
+res6<-res$by.LG[[6]];res6<-res6[which(res6$p < .000001),];res6$Chr<-"6"
+res7<-res$by.LG[[7]];res7<-res7[which(res7$p < .000001),];res7$Chr<-"7"
+res8<-res$by.LG[[8]];res8<-res8[which(res8$p < .000001),];res8$Chr<-"8"
+res9<-res$by.LG[[9]];res9<-res9[which(res9$p < .000001),];res9$Chr<-"9"
+res10<-res$by.LG[[10]];res10<-res10[which(res10$p < .000001),];res10$Chr<-"10"
+res11<-res$by.LG[[11]];res11<-res11[which(res11$p < .000001),];res11$Chr<-"11"
+res12<-res$by.LG[[12]];res12<-res12[which(res12$p < .000001),];res12$Chr<-"12"
+res13<-res$by.LG[[13]];res13<-res13[which(res13$p < .000001),];res13$Chr<-"13"
+res14<-res$by.LG[[14]];res14<-res14[which(res14$p < .000001),];res14$Chr<-"14"
+res15<-res$by.LG[[15]];res15<-res15[which(res15$p < .000001),];res15$Chr<-"15"
+res16<-res$by.LG[[16]];res16<-res16[which(res16$p < .000001),];res16$Chr<-"16"
+res17<-res$by.LG[[17]];res17<-res17[which(res17$p < .000001),];res17$Chr<-"17"
+res18<-res$by.LG[[18]];res18<-res18[which(res18$p < .000001),];res18$Chr<-"18"
+```
+
+```{r}
+res_all_chr<-rbind(res1,res2,res3,res4,res5,res6,res7,res8,res9,res10,res11,res12,res13,res14,res15,res16)
+```
+
+###########################################
+#
+## plot the LD decay for each chromosome
+#
+###########################################
+```{r}
+ggplot(res_all_chr, aes(x=d, y=r2, group = Chr, color = Chr)) +
+  #geom_point(alpha=0.7, size=.3, shape=21, fill='grey30',colour='lightblue' ) +
+  geom_smooth(method=loess, se = FALSE, alpha=0.6)+
+  #scale_x_continuous(labels = comma,breaks = seq(0, 10000,500))+
+  #scale_x_continuous(breaks = seq(0, 10000,500))+
+  xlab('Distance (Kb)') +
+  ylab(expression (paste ('', r^2, ''))) +
+  #ggtitle("Linkage Disequilibrium") +
+  theme(axis.text=element_text(size=10)) +
+  theme_bw()
+```
+
+
