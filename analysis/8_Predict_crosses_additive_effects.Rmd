@@ -158,25 +158,11 @@ gpredsA1$genomicPredOut[[1]]$allelesubsnpeff[[1]][1:5,]
 #
 ###################################
 ```{r}
-  # Access the predicted GEBV
-     parents<-gpredsA1$gblups[[1]]%>% 
-  # Arrange in descending order based on the SELIND
-    arrange(desc(SELIND)) %>% 
-  # I'll pick 10 parents
-    group_by(Female_Parent,Male_parent)%>%
-    slice(1:3) %$%
-  # slice(1:3, .by=c(Female_Parent,Male_parent)) %$%
-  # And extract their GID to a vector
-     GID
-```
-
-
-```{r}
 # Access the predicted GEBV
-top10parents<-gpredsA1$gblups[[1]] %>% 
+top1000parents<-gpredsA1$gblups[[1]] %>% 
      # Arrange in descending order based on the SELIND
      arrange(desc(SELIND)) %>% 
-     # I'll pick the top 10 parents
+     # I'll pick the top 1000 parents
      slice(1:1000) %$%
      # And extract their GID to a vector
      GID
@@ -188,7 +174,7 @@ top10parents<-gpredsA1$gblups[[1]] %>%
 #
 #########################
 ```{r}
-CrossesToPredict<-crosses2predict(top10parents)
+CrossesToPredict<-crosses2predict(top1000parents)
 ```
 
 ####################################################################
@@ -224,8 +210,8 @@ CrossesToPredict %>% nrow()
 ## keep only haplos for candidate parents we want to predict crosses for
 ## those which will be used in prediction, saves memory
 haploMat<-readRDS(file=here::here("data","haplotypes.rds"))
-parenthaps<-sort(c(paste0(top10parents,"_HapA"),
-                   paste0(top10parents,"_HapB")))
+parenthaps<-sort(c(paste0(top1000parents,"_HapA"),
+                   paste0(top1000parents,"_HapB")))
 haploMat<-haploMat[parenthaps,]
 ```
 
@@ -251,9 +237,9 @@ crossPredsA<-predictCrosses(modelType="A",
                            CrossesToPredict=CrossesToPredict,
                            snpeffs=gpredsA1$genomicPredOut[[1]], 
                            haploMat=haploMat,
-                           dosages = dosages[parents,],
+                           dosages = dosages[top1000parents,],
                            recombFreqMat=recombFreqMat,
-                           ncores=8)
+                           ncores=10)
 elapsed<-proc.time()[3]-starttime; elapsed/60
 ```
 
@@ -276,12 +262,12 @@ saveRDS(crossPredsA,file = here::here("output","cross_genomicPredictions_additiv
 #
 ##################
 ```{r}
-top10crosses<-crossPredsA$tidyPreds[[1]] %>% 
+top1000crosses<-crossPredsA$tidyPreds[[1]] %>% 
      filter(Trait=="SELIND") %>% 
      dplyr::select(-predVar) %>% 
      arrange(desc(predUsefulness)) %>% 
      slice(1:10)
-top10crosses
+top1000crosses
 ```
 
 ###############################
