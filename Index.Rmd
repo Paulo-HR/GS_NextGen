@@ -34,5 +34,5 @@ wflow_start(directory = ".",
 #
 ##########################
 ```{r}
-wflow_open("analysis/8_Predict_crosses_additive_effects.Rmd")
+wflow_open("analysis/14_Linkage_disequilibrium.Rmd")
 ```
