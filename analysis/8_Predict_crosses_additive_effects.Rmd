@@ -44,6 +44,7 @@ grms<-list(A=A)
 blups<-readRDS(here::here("output","blups_fixed_labels.rds"))
 ```
 
+
 ##########
 #
 ## Blups
@@ -61,6 +62,7 @@ blups %<>%
                                   dplyr::rename(GID=germplasmName)))
 ```
 
+
 ############################################
 #
 ## Sorting the data frame by germplasmName
@@ -72,6 +74,7 @@ blups$TrainingData[[i]] <- blups$TrainingData[[i]][order(blups$TrainingData[[i]]
 }
 blups
 ```
+
 
 ###################
 #
@@ -116,7 +119,7 @@ gpredsA<-runGenomicPredictions(modelType = "A",
                                dosages = dosages,
                                blups = blups, 
                                grms = grms,
-                               ncores=16)
+                               ncores=32)
 ```
 
 #####################
@@ -239,7 +242,7 @@ crossPredsA<-predictCrosses(modelType="A",
                            haploMat=haploMat,
                            dosages = dosages[top1000parents,],
                            recombFreqMat=recombFreqMat,
-                           ncores=10)
+                           ncores=8)
 elapsed<-proc.time()[3]-starttime; elapsed/60
 ```
 
@@ -262,12 +265,12 @@ saveRDS(crossPredsA,file = here::here("output","cross_genomicPredictions_additiv
 #
 ##################
 ```{r}
-top1000crosses<-crossPredsA$tidyPreds[[1]] %>% 
+top10crosses<-crossPredsA$tidyPreds[[1]] %>% 
      filter(Trait=="SELIND") %>% 
      dplyr::select(-predVar) %>% 
      arrange(desc(predUsefulness)) %>% 
      slice(1:10)
-top1000crosses
+top10crosses
 ```
 
 ###############################
@@ -309,5 +312,4 @@ colnames(Ef.crosses)[3:7]<- c("DMCg.UC","logFSY.UC","logFRY.UC","PA.UC","StC.UC"
 write.table(crossPredsA$tidyPreds[[1]],file = here::here("output","crossPreds_additive.csv"),sep=",",quote = FALSE)
 write.table(Ef.crosses,file = here::here("output","UC_crosses_additive.csv"),sep=",",quote = FALSE)
 ```
-
 
