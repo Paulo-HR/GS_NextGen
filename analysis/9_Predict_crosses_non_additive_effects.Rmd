@@ -258,8 +258,16 @@ crossPredsAD$tidyPreds[[1]] %>% arrange(Trait,sireID,damID,predOf) %>% head
 #
 ##################
 ```{r}
-top10crosses<-crossPredsAD$rawPreds[[1]]$predVars[[1]] %>% 
-  arrange(sireID,damID,predOf,Trait1,Trait2) %>% slice(1:8)
+#top10crosses<-crossPredsAD$rawPreds[[1]]$predVars[[1]] %>% 
+ # arrange(sireID,damID,predOf,Trait1,Trait2) %>% slice(1:8)
+#top10crosses
+
+
+top10crosses<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="SELIND") %>% 
+     dplyr::select(-predVar) %>% 
+     arrange(desc(predUsefulness)) %>% 
+     slice(1:10)
 top10crosses
 ```
 
