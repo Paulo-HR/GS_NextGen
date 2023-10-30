@@ -1,0 +1,310 @@
+---
+title: "9_Predict_crosses_non_additive_effects"
+author: "Paulo-HR"
+date: "2023-10-30"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+###################
+#
+## Introduction
+#
+##################
+```{r}
+library(genomicMateSelectR)
+library(sommer)
+library(dplyr)
+library(data.table)
+```
+
+###############################
+#
+## Genomic relationship matrix
+#
+###############################
+```{r}
+## Dominance relationship matrix
+Dclassic<-readRDS(file=here::here("output","kinship_dom_classic.rds"))
+Dclassic<-Dclassic[order(rownames(Dclassic)),order(rownames(Dclassic))]
+dim(Dclassic)
+
+## Additive relationship matrix
+A<-readRDS(file=here::here("output","kinship_add.rds"))
+A<-A[order(rownames(A)),order(rownames(A))]
+dim(A)
+```
+
+##########
+#
+## Blups
+#
+##########
+```{r}
+blups<-readRDS(here::here("output","blups_fixed_labels.rds")) %>% 
+     # need to rename the "blups" list to comply with the runCrossVal function
+     dplyr::rename(TrainingData=blups) %>% 
+     dplyr::select(Trait,TrainingData) %>% 
+     # need also to remove phenotyped-but-not-genotyped lines
+     mutate(TrainingData=map(TrainingData,
+                             ~filter(.,germplasmName %in% rownames(A)) %>% 
+                                  # rename the germplasmName column to GID
+                                  dplyr::rename(GID=germplasmName)))
+```
+
+
+############################################
+#
+## Sorting the data frame by germplasmName
+#
+############################################
+```{r}
+for(i in 1:nrow(blups)){
+blups$TrainingData[[i]] <- blups$TrainingData[[i]][order(blups$TrainingData[[i]]$GID),]
+}
+blups
+```
+
+###################
+#
+## Dosage matrix
+#
+###################
+```{r}
+## Dosages are also needed for runGenomicPredictions() when getMarkEffs=TRUE
+## Reason is that they are used to extra SNP effects from GBLUP models
+dosages<-readRDS(here::here("data","dosages.rds"))
+```
+
+
+#######################
+#
+## Selection indices
+#
+#######################
+```{r}
+SIwts<-c(DMCg=5,
+         CWLSD=0,
+         CBroLS=0,
+         CBliLS=0,
+         StC=10,
+         PA=-8,
+         logFRY=10,
+         logFSY=8)
+SIwts
+```
+
+########################################################
+#
+## Constructing a genomic relationship matrix vector
+#
+########################################################
+```{r}
+grms<-list(A=A,Dclassic=Dclassic)
+```
+
+
+########################
+#
+## Get marker effects
+#
+########################
+```{r}
+gpredsAD<-runGenomicPredictions(modelType = "AD", 
+                                selInd = T, SIwts = SIwts,
+                                getMarkEffs = TRUE,
+                                dosages = dosages,
+                                blups = blups, 
+                                grms = list(A=grms[["A"]],
+                                            D=grms[["Dclassic"]]),
+                                ncores=32)
+
+```
+
+#####################
+#
+## Save the results
+#
+#####################
+```{r}
+saveRDS(gpredsAD,file = here::here("output","genomicPredictions_additive_plus_dominance.rds"))
+
+```
+
+############################
+#
+## Reading the results
+#
+############################
+```{r}
+gpredsAD1<-readRDS(here::here("output","genomicPredictions_additive_plus_dominance.rds"))
+```
+
+
+############################
+#
+## Visualizing SNP-effects 
+#
+############################
+```{r}
+#gpredsAD1$genomicPredOut[[1]]
+#gpredsAD1$genomicPredOut[[1]]$allelesubsnpeff[[1]][1:5,]
+```
+
+#########################
+#
+## Crosses-to-predict
+#
+#########################
+```{r}
+# Access the predicted GEBV
+top1000parents<-gpredsAD1$gblups[[1]] %>% 
+     # Arrange in descending order based on the SELIND
+     arrange(desc(SELIND)) %>% 
+     # I'll pick the top 10 parents
+     slice(1:1000) %$%
+     # And extract their GID to a vector
+     GID
+```
+
+#####################################
+#
+## vector of selected parents ID’s
+#
+#####################################
+```{r}
+CrossesToPredict<-crosses2predict(top1000parents)
+```
+
+####################################################################
+#
+## Data frame indicating what pairs of parents to predict crosses
+#
+####################################################################
+```{r}
+CrossesToPredict %>% head
+```
+
+##########################################
+#
+## Number of parents to make predictions
+#
+##########################################
+```{r}
+CrossesToPredict %>% nrow()
+```
+
+##############################
+#
+## Run predictCrosses
+#
+##############################
+
+######################
+#
+## Haplotype matrix
+#
+######################
+```{r}
+## keep only haplos for candidate parents we want to predict crosses for
+## those which will be used in prediction, saves memory
+haploMat<-readRDS(file=here::here("data","haplotypes.rds"))
+parenthaps<-sort(c(paste0(top1000parents,"_HapA"),
+                   paste0(top1000parents,"_HapB")))
+haploMat<-haploMat[parenthaps,]
+```
+
+#####################################
+#
+## Recombination frequency matrix
+#
+#####################################
+```{r}
+recombFreqMat<-readRDS(file=here::here("output","recombFreqMat_1minus2c.rds"))
+```
+
+
+##############################
+#
+## Predicted Crosses values
+#
+##############################
+```{r}
+starttime<-proc.time()[3]
+crossPredsAD<-predictCrosses(modelType="AD",
+                           selInd = T, SIwts = SIwts,
+                           CrossesToPredict=CrossesToPredict,
+                           snpeffs=gpredsAD1$genomicPredOut[[1]], 
+                           haploMat=haploMat,
+                           dosages = dosages[top1000parents,],
+                           recombFreqMat=recombFreqMat,
+                           ncores=32)
+elapsed<-proc.time()[3]-starttime; elapsed/60
+```
+
+```{r}
+crossPredsAD$tidyPreds[[1]] %>% str
+```
+
+
+```{r}
+crossPredsAD$tidyPreds[[1]] %>% arrange(Trait,sireID,damID,predOf) %>% head
+```
+
+###################
+#
+## Crossing plan
+#
+##################
+```{r}
+top10crosses<-crossPredsAD$rawPreds[[1]]$predVars[[1]] %>% 
+  arrange(sireID,damID,predOf,Trait1,Trait2) %>% slice(1:8)
+top10crosses
+```
+
+###############################
+#
+## Pull effect for each trait
+#
+###############################
+```{r}
+Ef.crosses1<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="DMCg")  
+Ef.crosses2<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="CWLSD")
+Ef.crosses3<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="CBroLS")
+Ef.crosses4<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="CBliLS")
+Ef.crosses5<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="StC")
+Ef.crosses6<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="PA")
+Ef.crosses7<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="logFRY")
+Ef.crosses8<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(Trait=="logFSY")
+```
+
+###########################
+#
+## Merging all the traits
+#
+###########################
+```{r}
+table(Ef.crosses1$damID == Ef.crosses2$damID)
+table(Ef.crosses1$sireID == Ef.crosses2$sireID)
+Ef.crosses <- cbind(Ef.crosses1[,c(1,2,9)],Ef.crosses2[,9],Ef.crosses3[,9],Ef.crosses4[,9],Ef.crosses5[,9], Ef.crosses6[,9],Ef.crosses7[,9],Ef.crosses8[,9])
+colnames(Ef.crosses)[3:10]<- c("DMCg.UC","CWLSD.UC","CBrolS.UC","CBliLS.UC","StC.UC","PA.UC","logFRY.UC","logFSY.UC")
+```
+
+###################
+#
+## Saving results
+#
+###################
+```{r}
+write.table(crossPredsAD$tidyPreds[[1]],file = here::here("output","crossPreds_additive_plus_dominance.csv"),sep=",",quote = FALSE)
+write.table(Ef.crosses,file = here::here("output","UC_crosses_additive_plus_dominance.csv"),sep=",",quote = FALSE)
+```
