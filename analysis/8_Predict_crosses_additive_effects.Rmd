@@ -242,7 +242,7 @@ crossPredsA<-predictCrosses(modelType="A",
                            haploMat=haploMat,
                            dosages = dosages[top1000parents,],
                            recombFreqMat=recombFreqMat,
-                           ncores=8)
+                           ncores=32)
 elapsed<-proc.time()[3]-starttime; elapsed/60
 ```
 
@@ -259,6 +259,16 @@ crossPredsA$tidyPreds[[1]] %>% str
 saveRDS(crossPredsA,file = here::here("output","cross_genomicPredictions_additive.rds"))
 
 ```
+
+############################
+#
+## Reading the results
+#
+############################
+```{r}
+crossPredsA<-readRDS(here::here("output","cross_genomicPredictions_additive.rds"))
+```
+
 ###################
 #
 ## Crossing plan
@@ -282,13 +292,19 @@ top10crosses
 Ef.crosses1<-crossPredsA$tidyPreds[[1]] %>% 
      filter(Trait=="DMCg")  
 Ef.crosses2<-crossPredsA$tidyPreds[[1]] %>% 
-     filter(Trait=="logFSY")
+     filter(Trait=="CWLSD")
 Ef.crosses3<-crossPredsA$tidyPreds[[1]] %>% 
-     filter(Trait=="logFRY")
+     filter(Trait=="CBroLS")
 Ef.crosses4<-crossPredsA$tidyPreds[[1]] %>% 
-     filter(Trait=="PA")
+     filter(Trait=="CBliLS")
 Ef.crosses5<-crossPredsA$tidyPreds[[1]] %>% 
      filter(Trait=="StC")
+Ef.crosses6<-crossPredsA$tidyPreds[[1]] %>% 
+     filter(Trait=="PA")
+Ef.crosses7<-crossPredsA$tidyPreds[[1]] %>% 
+     filter(Trait=="logFRY")
+Ef.crosses8<-crossPredsA$tidyPreds[[1]] %>% 
+     filter(Trait=="logFSY")
 ```
 
 ###########################
@@ -299,8 +315,8 @@ Ef.crosses5<-crossPredsA$tidyPreds[[1]] %>%
 ```{r}
 table(Ef.crosses1$damID == Ef.crosses2$damID)
 table(Ef.crosses1$sireID == Ef.crosses2$sireID)
-Ef.crosses <- cbind(Ef.crosses1[,c(1,2,9)],Ef.crosses2[,9],Ef.crosses3[,9],Ef.crosses4[,9],Ef.crosses5[,9])
-colnames(Ef.crosses)[3:7]<- c("DMCg.UC","logFSY.UC","logFRY.UC","PA.UC","StC.UC")
+Ef.crosses <- cbind(Ef.crosses1[,c(1,2,9)],Ef.crosses2[,9],Ef.crosses3[,9],Ef.crosses4[,9],Ef.crosses5[,9],Ef.crosses6[,9],Ef.crosses7[,9],Ef.crosses8[,9])
+colnames(Ef.crosses)[3:10]<- c("DMCg.UC","CWLSD.UC","CBroLS.UC","CBliLS.UC","StC.UC","PA.UC","logFRY.UC","logFSY.UC")
 ```
 
 ###################
