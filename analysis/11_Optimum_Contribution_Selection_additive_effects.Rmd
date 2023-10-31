@@ -1,0 +1,308 @@
+---
+title: "11_Optimum_Contribution_Selection_additive_effects"
+author: "Paulo-HR"
+date: "2023-10-31"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+################
+#
+## Introduction
+#
+#################
+```{r}
+library(optiSel)
+library(data.table)
+library(AlphaSimR)
+```
+
+
+########################
+#
+## Phenotyping dataset
+#
+########################
+```{r}
+haplotype<-read.delim("hapmap_OCS.txt")
+haplotype$Chr=as.numeric(haplotype$Chr)
+haplotype[1:10,1:10]
+dim(haplotype)
+```
+
+#####################################
+#
+## Removing HapA from the colnames
+#
+#####################################
+```{r}
+#for ( col in 1:ncol(haplotype)){
+#    colnames(haplotype)[col] <-  sub("_HapA.*", "", colnames(haplotype)[col])
+#}
+```
+
+####################################
+#
+## Removing HapB from the colnames
+#
+####################################
+```{r}
+#for ( col in 1:ncol(haplotype)){
+#    colnames(haplotype)[col] <-  sub("_HapB.*", "", colnames(haplotype)[col])
+#}
+```
+
+##########################
+#
+## Subset by Chromossome
+#
+##########################
+```{r}
+#chr1=subset(haplotype, haplotype$Chr ==1);chr1=chr1[,-c(2:5)]
+#chr2=subset(haplotype, haplotype$Chr ==2);chr2=chr2[,-c(2:5)]
+#chr3=subset(haplotype, haplotype$Chr ==3);chr3=chr3[,-c(2:5)]
+#chr4=subset(haplotype, haplotype$Chr ==4);chr4=chr4[,-c(2:5)]
+#chr5=subset(haplotype, haplotype$Chr ==5);chr5=chr5[,-c(2:5)]
+#chr6=subset(haplotype, haplotype$Chr ==6);chr6=chr6[,-c(2:5)]
+#chr7=subset(haplotype, haplotype$Chr ==7);chr7=chr7[,-c(2:5)]
+#chr8=subset(haplotype, haplotype$Chr ==8);chr8=chr8[,-c(2:5)]
+#chr9=subset(haplotype, haplotype$Chr ==9);chr9=chr9[,-c(2:5)]
+#chr10=subset(haplotype, haplotype$Chr ==10);chr10=chr10[,-c(2:5)]
+#chr11=subset(haplotype, haplotype$Chr ==11);chr11=chr11[,-c(2:5)]
+#chr12=subset(haplotype, haplotype$Chr ==12);chr12=chr12[,-c(2:5)]
+#chr13=subset(haplotype, haplotype$Chr ==13);chr13=chr13[,-c(2:5)]
+#chr14=subset(haplotype, haplotype$Chr ==14);chr14=chr14[,-c(2:5)]
+#chr15=subset(haplotype, haplotype$Chr ==15);chr15=chr15[,-c(2:5)]
+#chr16=subset(haplotype, haplotype$Chr ==16);chr16=chr16[,-c(2:5)]
+#chr17=subset(haplotype, haplotype$Chr ==17);chr17=chr17[,-c(2:5)]
+#chr18=subset(haplotype, haplotype$Chr ==18);chr18=chr18[,-c(2:5)]
+```
+
+#################################
+#
+## Saving data by chromossome
+#
+#################################
+```{r}
+#write.table(chr1,file = here::here("data","OtherBreeds.Chr1.txt"),sep=",",quote = FALSE)
+#write.table(chr2,file = here::here("data","OtherBreeds.Chr2.txt"),sep=",",quote = FALSE)
+#write.table(chr3,file = here::here("data","OtherBreeds.Chr3.txt"),sep=",",quote = FALSE)
+#write.table(chr4,file = here::here("data","OtherBreeds.Chr4.txt"),sep=",",quote = FALSE)
+#write.table(chr5,file = here::here("data","OtherBreeds.Chr5.txt"),sep=",",quote = FALSE)
+#write.table(chr6,file = here::here("data","OtherBreeds.Chr6.txt"),sep=",",quote = FALSE)
+#write.table(chr7,file = here::here("data","OtherBreeds.Chr7.txt"),sep=",",quote = FALSE)
+#write.table(chr8,file = here::here("data","OtherBreeds.Chr8.txt"),sep=",",quote = FALSE)
+#write.table(chr9,file = here::here("data","OtherBreeds.Chr9.txt"),sep=",",quote = FALSE)
+#write.table(chr10,file = here::here("data","OtherBreeds.Chr10.txt"),sep=",",quote = FALSE)
+#write.table(chr11,file = here::here("data","OtherBreeds.Chr11.txt"),sep=",",quote = FALSE)
+#write.table(chr12,file = here::here("data","OtherBreeds.Chr12.txt"),sep=",",quote = FALSE)
+#write.table(chr13,file = here::here("data","OtherBreeds.Chr13.txt"),sep=",",quote = FALSE)
+#write.table(chr14,file = here::here("data","OtherBreeds.Chr14.txt"),sep=",",quote = FALSE)
+#write.table(chr15,file = here::here("data","OtherBreeds.Chr15.txt"),sep=",",quote = FALSE)
+#write.table(chr16,file = here::here("data","OtherBreeds.Chr16.txt"),sep=",",quote = FALSE)
+#write.table(chr17,file = here::here("data","OtherBreeds.Chr17.txt"),sep=",",quote = FALSE)
+#write.table(chr18,file = here::here("data","OtherBreeds.Chr18.txt"),sep=",",quote = FALSE)
+```
+
+########
+#
+## Map
+#
+########
+```{r}
+# Data frame map contains the marker map and has columns Name (marker name), Chr (chromosome number), Position, Mb (position in Mega base pairs), and cM (position in centiMorgan)
+
+map<-haplotype[,c(1:3)]
+map$cM=0
+map$Mb=as.numeric(map$POS)/100000
+colnames(map)=c("Name","Chr", "Position","cM","Mb")
+map[1:10,1:5]
+```
+
+#####################
+#
+## Saving map data
+#
+#####################
+```{r}
+#write.table(map,file = here::here("data","map.txt"),sep=",",quote = FALSE)
+```
+
+######################
+#
+## Reading map data
+#
+######################
+```{r}
+#map <- read.table("map.txt", header=T, sep=",", dec=".") 
+```
+
+####################################################
+#
+## Identifying the directory of chromossome data
+#
+####################################################
+```{r}
+bfiles <- paste0("OtherBreeds.Chr", 1:18, ".phased")
+```
+
+
+###############################################
+#
+## Estimate kinships from phased marker data
+#
+###############################################
+```{r}
+## Compute the kinships that are to be managed. Below, the kinship is named sKin, which is a shorthand for segment based kinship.
+sKin <- segIBD(bfiles, map)
+```
+
+
+##############################
+#
+## Importing phenotype data
+#
+###############################
+```{r}
+blups<-readRDS(here::here("output","genomicPredictions_additive.rds"))
+```
+
+############################
+#
+## Visualizing SNP-effects 
+#
+############################
+```{r}
+blups$genomicPredOut[[1]]
+blups$gblups[[1]] %>% head
+
+#SNP-effects represent predictions of allele substitution effects
+blups$genomicPredOut[[1]]$allelesubsnpeff[[1]][1:5,]
+```
+
+
+########################
+#
+## Pull out the traits
+#
+#########################
+```{r}
+SELIND=blups$gblups[[1]] 
+SELIND=SELIND[,c(1,3)]
+colnames(SELIND)=c("Indiv","SELIND")
+SELIND[1:10,1:2]
+```
+
+
+
+###################################################
+#
+##  the function `candes` checks that all is well
+#
+###################################################
+```{r}
+## Create variable cand with function candes, containing all information required to describe the selection candidates, which are the phenotypes and the kinships. The current values of the parameters in the population and the available objective functions and constraints for OCS are shown. Generations are defined to be non-overlapping if argument cont is omitted.
+
+cand  <- candes(phen=SELIND, sKin=sKin)
+cand$mean
+```
+
+
+```{r}
+## The critical effective size, i. e. the size below which the fitness of the population steadily decreases, depends on the population and is usually between 50 and 100. But there seems to be a consensus that 50-100 is a long-term viable effective size. To be on the safe side, an effective size of Ne=100 should be envisaged (T. H. E. Meuwissen 2009)
+
+Ne <- 100
+L<- 1
+con <- list(
+  ub.sKin = 1-(1-cand$mean$sKin)*(1-1/(2*Ne))^(1/L)
+)
+```
+
+############################################
+#
+## Optimum Contributions of the Selection
+#
+############################################
+```{r}
+Offspring <- opticont("max.SELIND", cand, con, quiet=T, trace=FALSE)
+```
+
+
+```{r}
+Candidate <- Offspring$parent[,  c("Indiv", "oc")]
+Candidate[1:10,1:2]
+candi=(Candidate[Candidate$oc>0.01,])
+candi
+```
+
+###################
+#
+## Make cross plan
+#
+###################
+```{r}
+#Mating <- matings(Candidate, Kin=sKin)
+```
+
+################################
+#
+## Breeding scheme parameters
+#
+################################
+```{r}
+nFounders <- nProgeny <- 888
+nParents <- 20
+```
+
+
+######################################################
+#
+# Keep lines that have a chance to be a parent once
+#
+######################################################
+```{r}
+keep <- which(Candidate$oc > 1 / (2*nProgeny))
+probs <- Candidate$oc[keep] / sum(Candidate$oc[keep])
+```
+
+
+### Function to create crossPlan  
+This makes a crossing plan for `AlphaSimR::makeCross` which allocates parents the correct number of times according to their usage probability, but where otherwise crossing is completely random. One consequence is that self-fertilization is possible.  
+```{r Make cross plan}
+# Function to make a cross plan with numbers of crosses per parent in proportion
+# to their usage probability. Those probabilities are given in the probs param.
+# NOTE: if probs="equal", each parent is used equally frequently.  That is NOT
+# random mating. If probs="rand" the function will return a random cross plan
+# that allows selfing.
+makeCrossPlan <- function(ids, probs="rand", nProgeny){
+  nParents <- length(ids)
+  if (probs[1] == "rand"){ # Random cross plan allowing selfing
+    cp <- sapply(1:nProgeny, function(d) ids[sample(length(ids), 2, replace=T)])
+    return(t(cp))
+  }
+  if (probs[1] == "equal") probs <- rep(1/nParents, nParents)
+  # The part below is actually used by optimal contributions
+  if (length(probs) != length(ids)) 
+    stop("Number of ids and crossing probs should be the same")
+  if (abs(1 - sum(probs)) > 1e-6) stop("Crossing probabilites must sum to 1")
+  # Two parents per progeny
+  parIdx <- round(cumsum(2*nProgeny*probs))
+  nEachPar <- diff(c(0, parIdx))
+  parVec <- unlist(lapply(1:nParents, function(par) ids[rep(par, nEachPar[par])]))
+  return(matrix(sample(parVec), ncol=2))
+}
+```
+
+
+
+###################
+#
+## Make cross plan
+#
+###################
+```{r}
+crossPlan <- makeCrossPlan(keep, probs, nProgeny=nProgeny)
+```
+
+
