@@ -75,6 +75,8 @@ blups
 ## Dosages are also needed for runGenomicPredictions() when getMarkEffs=TRUE
 ## Reason is that they are used to extra SNP effects from GBLUP models
 dosages<-readRDS(here::here("data","dosages.rds"))
+dosages <- dosages[order(rownames(dosages)), ]
+dim(dosages)
 ```
 
 
