@@ -160,9 +160,11 @@ gpredsAD1<-readRDS(here::here("output","genomicPredictions_additive_plus_dominan
 ```{r}
 # Access the predicted GEBV
 top1000parents<-gpredsAD1$gblups[[1]] %>% 
+     # Filter by GETV values
+     filter(predOf=="GETGV") %>% 
      # Arrange in descending order based on the SELIND
      arrange(desc(SELIND)) %>% 
-     # I'll pick the top 10 parents
+     # I'll pick the top 1000 parents
      slice(1:1000) %$%
      # And extract their GID to a vector
      GID
@@ -247,10 +249,25 @@ elapsed<-proc.time()[3]-starttime; elapsed/60
 crossPredsAD$tidyPreds[[1]] %>% str
 ```
 
-
+#####################
+#
+## Save the results
+#
+#####################
 ```{r}
-crossPredsAD$tidyPreds[[1]] %>% arrange(Trait,sireID,damID,predOf) %>% head
+saveRDS(crossPredsAD,file = here::here("output","cross_genomicPredictions_non_additive.rds"))
+
 ```
+
+############################
+#
+## Reading the results
+#
+############################
+```{r}
+crossPredsA<-readRDS(here::here("output","cross_genomicPredictions_non_additive.rds"))
+```
+
 
 ###################
 #
