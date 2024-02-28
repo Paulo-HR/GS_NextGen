@@ -1,0 +1,95 @@
+---
+title: "27_Venn_plot_crosses"
+author: "Paulo-HR"
+date: "2024-02-15"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+###################
+#
+## Introduction
+#
+###################
+```{r}
+library("ggvenn") 
+library("ggplot2")
+```
+
+
+#########################
+#
+## Load the data frame
+#
+#########################
+```{r}
+## Additive
+cross_A=read.table(here::here("data","crosses_parents_additive.csv"), header=T, na.strings="NA", sep=";", dec=",") 
+head(cross_A)
+
+## Non additive
+cross_AD=read.table(here::here("data","crosses_parents_non_additive.csv"), header=T, na.strings="NA", sep=";", dec=",") 
+head(cross_AD)
+
+## Directional Dominance
+cross_DirDom=read.table(here::here("data","crosses_parents_directional_dom.csv"), header=T, na.strings="NA", sep=";", dec=",") 
+```
+
+########################
+#
+## Create a demo data
+#
+########################
+```{r}
+## Additive
+A <-list('sire'=cross_A$ns,'dam'=cross_A$nd)
+
+## Non Additive
+AD <-list('sire'=cross_AD$ns,'dam'=cross_AD$nd) 
+
+
+## Directional Dominance
+DirDom <-list('sire'=cross_DirDom$ns,'dam'=cross_DirDom$nd) 
+```
+
+#########
+#
+## Plot
+#
+#########
+
+#############
+#
+## Additive
+#
+#############
+```{r}
+str(cross_A)
+ggvenn(A,show_percentage=TRUE,stroke_color="black", fill_color = c("blue",  "yellow"),
+       stroke_linetype="solid") 
+```
+
+###################
+#
+## Non Additive
+#
+###################
+```{r}
+ggvenn(AD,show_percentage=TRUE,stroke_color="black", fill_color = c("green", "red"),
+       stroke_linetype="solid") 
+```
+
+
+############################
+#
+## Directional Dominance
+#
+#############################
+```{r}
+ggvenn(DirDom,show_percentage=TRUE,stroke_color="black", fill_color = c("firebrick", "limegreen"),
+       stroke_linetype="solid") 
+```
+
+
+
