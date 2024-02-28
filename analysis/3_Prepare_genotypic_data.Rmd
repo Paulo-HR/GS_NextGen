@@ -122,9 +122,6 @@ write.table(subset_unique_names_for_vcf,file = "subset_unique_names_for_vcf.txt"
 #####################
 ```{r}
 phenos<-readRDS(here::here("output","phenotypes_cleaned.rds"))
-
-## fixing the clone name
-phenos$germplasmName=ifelse(phenos$germplasmName=='BGM-06111', 'BGM-0611', phenos$germplasmName)
 ```
 
 
@@ -135,7 +132,7 @@ phenos$germplasmName=ifelse(phenos$germplasmName=='BGM-06111', 'BGM-0611', pheno
 ############################
 ```{r}
 phenos$germplasmName <- as.factor(phenos$germplasmName)
-phenos$germplasmName <-  revalue(phenos$germplasmName,                                                                                    c("01-Domingos-Martins"="X01.Domingos.Martins",
+phenos$germplasmName <-  plyr::revalue(phenos$germplasmName,                                                                                    c("01-Domingos-Martins"="X01.Domingos.Martins",
 "03-DM"="X03.DM",
 "04-UFES"="X04.UFES",
 "05-Macaxeira"="X05.Macaxeira",
@@ -291,7 +288,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "98103-08"="X98.103.08",
 "Abacaxi"="BR.22.DArT.PL22_F05...Abacaxi",
 "Aciolina"="Aciolina",
-"Aipim-Abacate"="Aipim.Abacate",
 "Aipim-Abacate-2"="Aipim.Abacate.2",
 "Aipim-Brasilia"="Aipim.Brasilia",
 "Aipim-Eucalipto-NV"="Aipim.Eucalipto.NV",
@@ -396,20 +392,14 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-0144"="BGM.0144",
 "BGM-0145"="BGM.0145",
 "BGM-0150"="BGM.0150",
-"BGM-0150-A"="BGM.0150A",
-"BGM-0150-B"="BGM.0150.B",
 "BGM-0151"="BGM.0151",
 "BGM-0152"="BGM.0152",
-"BGM-0152-A"="BGM.0152A",
-"BGM-0152-B"="BGM.0152.B",
 "BGM-0155"="BGM.0155",
 "BGM-0156"="BGM.0156",
 "BGM-0157"="BGM.0157",
 "BGM-0160"="BGM.0160",
 "BGM-0161"="BGM.0161",
 "BGM-0162"="BGM.0162",
-"BGM-0162-A"="BGM.0162.A",
-"BGM-0162-B"="BGM.0162.B",
 "BGM-0163"="BGM.0163",
 "BGM-0164"="BGM.0164",
 "BGM-0165"="BGM.0165",
@@ -564,13 +554,11 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-0449"="BGM.0449",
 "BGM-0451"="BGM.0451",
 "BGM-0452"="BGM.0452",
-"BGM-0452-1"="BGM.0452.1",
 "BGM-0456"="BGM.0456",
 "BGM-0460"="BGM.0460",
 "BGM-0461"="BGM.0461",
 "BGM-0462"="BGM.0462",
 "BGM-0463"="BGM.0463",
-"BGM-0463/0780"="BR.20.DArT.PL22_F10...BGM.0463.0780",
 "BGM-0464"="BGM.0464",
 "BGM-0465"="BGM.0465",
 "BGM-0467"="BGM.0467",
@@ -645,7 +633,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-0607"="BGM.0607",
 "BGM-0609"="BGM.0609",
 "BGM-0611"="BGM.0611",
-"BGM-06111"="BGM.06111",
 "BGM-0614"="BGM.0614",
 "BGM-0615"="BGM.0615",
 "BGM-0618"="BGM.0618",
@@ -709,8 +696,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-0778"="BGM.0778",
 "BGM-0779"="BGM.0779",
 "BGM-0780"="BGM.0780",
-"BGM-0780-B"="BGM.0780.B.",
-"BGM-0780-E"="BGM.0780.E.",
 "BGM-0781"="BGM.0781",
 "BGM-0783"="BGM.0783",
 "BGM-0785"="BGM.0785",
@@ -786,7 +771,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-0929"="BGM.0929.",
 "BGM-0930"="BGM.0930",
 "BGM-0931"="BGM.0931",
-"BGM-0931-T"="BR.20.DArT.PL22_B11...BGM.0931.T",
 "BGM-0933"="BR.22.DArT.PL22_G05...BGM.0933",
 "BGM-0934"="BGM.0934",
 "BGM-0935"="BGM.0935",
@@ -944,8 +928,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-1255"="BGM.1255",
 "BGM-1259"="BGM.1259",
 "BGM-1262"="BGM.1262",
-"BGM-1262-C"="BGM.1262C",
-"BGM-1262-E"="BGM.1262E",
 "BGM-1263"="BGM.1263",
 "BGM-1265"="BGM.1265",
 "BGM-1267"="BGM.1267",
@@ -1061,7 +1043,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-1498"="BGM.1498",
 "BGM-1499"="BGM.1499",
 "BGM-1502"="BGM.1502",
-"BGM-1502-M"="BGM.1502.M.",
 "BGM-1503"="BGM.1503",
 "BGM-1507"="BGM.1507",
 "BGM-1508"="BGM.1508",
@@ -1169,7 +1150,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-1718"="BGM.1718",
 "BGM-1721"="BGM.1721",
 "BGM-1722"="BGM.1722",
-"BGM-1722-D"="BGM.1722.D.",
 "BGM-1723"="BGM.1723",
 "BGM-1725"="BGM.1725",
 "BGM-1726"="BGM.1726",
@@ -1198,7 +1178,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "BGM-1756"="BGM.1756",
 "BGM-1757"="BGM.1757",
 "BGM-1759"="BGM.1759",
-"BGM-1759-B"="BGM.1759.B.",
 "BGM-1760"="BR.SET1.18.BGM.1760.1.182",
 "BGM-1761"="BGM.1761",
 "BGM-1762"="BGM.1762",
@@ -7476,7 +7455,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "CL-Acre"="CL.Acre",
 "CL-Rangel"="CL.Rangel",
 "Conquista-1"="Conquista.1",
-"Conquista-2"="Conquista.2",
 "CPAFRO-03"="CPAFRO.03",
 "CPAFRO-04"="CPAFRO.04",
 "CPAFRO-05"="CPAFRO.05",
@@ -7562,7 +7540,6 @@ phenos$germplasmName <-  revalue(phenos$germplasmName,                          
 "TMS 96/1089A"="BR.22.DArT.PL22_D08...TME.96",
 "TZ-130"="BR.22.DArT.PL22_C08...TZ.130",
 "Uberlandia-2"="Uberlandia.2",
-"Uberlandia-3"="Uberlandia.3",
 "Vassourinha-branca"="Vassourinha.branca",
 "Vassourinha-CCAufes"="Vassourinha.CCAufes."))
 ```
@@ -7611,7 +7588,7 @@ subset_unique_names_for_vcf[!subset_unique_names_for_vcf %in% germplasm_with_phe
 #
 ###############################
 ```{r}
-vcfName<-"DCas22_6902"
+vcfName<-"DCas22_6902_subset"
 haps<-fread(paste0(vcfName,".hap.gz"),
             stringsAsFactors = F,header = F) %>% 
   as.data.frame
@@ -7637,6 +7614,7 @@ hapids<-sampleids %>%
 colnames(haps)<-c("Chr","HAP_ID","Pos","REF","ALT",hapids$HapID)
 dim(haps)
 ```
+
 
 ##########################################
 #
@@ -7685,7 +7663,7 @@ dosages[1:5,1:5]
 ####################
 ```{r}
 # use function built into genomicMateSelectR
-dosages<-maf_filter(dosages,thresh = 0.01)
+dosages<-maf_filter(haps,thresh = 0.01)
 dim(dosages)
 
 # subset haps to match
