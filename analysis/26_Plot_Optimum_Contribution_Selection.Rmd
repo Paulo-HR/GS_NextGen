@@ -1,0 +1,88 @@
+---
+title: "26_Plot_Optimum_Contribution_Selection"
+author: "Paulo-HR"
+date: "2024-02-12"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+###################
+#
+## Introduction
+#
+###################
+```{r}
+library(ggplot2)
+```
+
+
+#########################
+#
+## Load the data frame
+#
+#########################
+```{r}
+dados=read.table(here::here("data","OCS_data.csv"), header=T, na.strings="NA", sep=";", dec=",") 
+head(dados)
+```
+
+#######################
+#
+## Plotting OC values
+#
+#######################
+```{r}
+dados$cross= factor(dados$cross, levels = c("C1","C2","C3","C4","C5","C6","C7","C8","C9",
+                                            "C10","C11","C12","C13"))
+
+
+
+ggplot(dados, aes(x=cross, y=oc, group=model)) +
+  geom_line(aes(linetype=model, color=model),linewidth=1)+
+  geom_point(aes(shape=model, color=model),size=3)+
+  xlab("Crosses")+
+  ylab("OC value")+
+  scale_colour_manual(values=c( "black", "firebrick","darkblue"))+
+  annotate("pointrange", x = 4, y = 0.03, ymin = 0.04, ymax = 0.04,
+           colour = "orange", size = 1.5, alpha=0.4)+
+  annotate("pointrange", x = 10, y = 0.182, ymin = 0.04, ymax = 0.04,
+           colour = "orange", size = 1.5, alpha=0.4)+
+  annotate("pointrange", x = 6, y = 0.114, ymin = 0.04, ymax = 0.04,
+           colour = "chartreuse", size = 1.5, alpha=0.4)+
+  annotate("pointrange", x = 12, y = 0.097, ymin = 0.04, ymax = 0.04,
+           colour = "chartreuse", size = 1.5, alpha=0.4)+
+  annotate("pointrange", x = 5, y = 0.087, ymin = 0.04, ymax = 0.04,
+           colour = "firebrick", size = 1.5, alpha=0.4)+
+  annotate("pointrange", x = 8, y = 0.062, ymin = 0.04, ymax = 0.04,
+           colour = "firebrick", size = 1.5, alpha=0.4)+
+  annotate("pointrange", x = 9, y = 0.148, ymin = 0.04, ymax = 0.04,
+           colour = "dodgerblue", size = 1.5, alpha=0.4)+
+  annotate("pointrange", x = 11, y = 0.125, ymin = 0.04, ymax = 0.04,
+           colour = "dodgerblue", size = 1.5, alpha=0.4)+
+    scale_shape_manual(values=c(15,16,17,18,25))+
+  scale_y_continuous(limits=c(0.01,0.35),
+                     breaks = c(0.01,0.05,0.1,0.15,
+                       0.2,0.25,0.3,0.35,0.4))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+```
+
+
+
+
+
+
