@@ -27,14 +27,37 @@ library(scales)
 library(stickylabeller)
 ```
 
+######################
+#
+## Haplotype matrix
+#
+######################
+```{r}
+haploMat<-readRDS(file=here::here("data","haplotypes.rds"))
+```
+
+
 ##################
 #
 ## Dosage matrix
 #
 ###################
 ```{r}
-dosages<-read.delim(here::here("data","genotypes_coded_DL.txt"))
-dim(dosages)
+dosages<-t(haploMat)
+dosages<- as.data.frame(dosages)%>%dplyr::select(contains("_HapB", ignore.case = TRUE))
+dosages<- dosages %>% rename_at(vars(matches("_HapB")), ~str_remove(., "_HapB")) # removing _HapB from the labels
+```
+
+#####################################
+#
+## Sampling some molecular markers
+#
+#####################################
+```{r}
+#set.seed(165464)
+dosages1<- dosages[,sample(1000,replace = FALSE)]
+dosages2<-t(dosages1)
+dim(dosages2)
 ```
 
 ####################
@@ -43,10 +66,14 @@ dim(dosages)
 #
 ####################
 ```{r}
-mapCP<-read.delim(here::here("data","map_DL.txt"))
-#mapCP$pos<- mapCP$pos/1000
-names(mapCP) <- c("Locus","Position","LG")
-head(mapCP)
+dosages_names<-as.data.frame(colnames(dosages2))
+dosages_names<-cbind(dosages_names,dosages_names)
+colnames(dosages_names)<-c("Locus","markers")
+mapCP<- dosages_names%>% separate(markers, c('LG', 'Position','ALT','REF'))
+mapCP$Position<-as.integer(mapCP$Position)
+mapCP$LG<-as.integer(mapCP$LG)
+mapCP<-mapCP[,c(1,3,2)]
+mapCP[1:10,1:3]
 ```
 
 ####################################################
@@ -64,7 +91,7 @@ head(mapCP)
 #
 #####################
 ```{r}
-res <- LD.decay(dosages, mapCP)
+res <- LD.decay(dosages2, mapCP)
 ```
 
 ############################################
@@ -74,7 +101,7 @@ res <- LD.decay(dosages, mapCP)
 ############################################
 ```{r}
 res_all<-res$all.LG[which(res$all.LG$p < .000001),]
-res_all$d<-res_all$d/1000
+res_all$d<-res_all$d/1000000
 head(res_all)
 ```
 
@@ -86,9 +113,10 @@ head(res_all)
 ```{r}
 ggplot(res_all, aes(x=d, y=r2)) +
    geom_point(alpha=0.7, size=.3, shape=21, fill='grey30',colour='lightblue' ) +
-  geom_smooth(method = loess, se = FALSE)+
-  scale_x_continuous(breaks = seq(0, 65000,500))+
-    xlab('Distance (Kb)') +
+  geom_smooth(stat = "smooth",method = "loess", se=FALSE)+
+  scale_x_continuous(breaks = seq(0, 33,1.0))+
+  scale_y_continuous(breaks = seq(0, 1.0,0.05))+
+    xlab('Distance (Mb)') +
   ylab(expression (paste ('', r^2, ''))) +
   #ggtitle("Linkage Disequilibrium") +
   theme(strip.text = element_text(size=12,family="serif",face="bold"))+
@@ -116,24 +144,24 @@ ggplot(res_all, aes(x=d, y=r2)) +
 #
 #############################################################
 ```{r}
-res1<-res$by.LG[[1]];res1<-res1[which(res1$p < .000001),];res1$Chr<-"1";res1$d<-res1$d/1000
-res2<-res$by.LG[[2]];res2<-res2[which(res2$p < .000001),];res2$Chr<-"2";res2$d<-res2$d/1000
-res3<-res$by.LG[[3]];res3<-res3[which(res3$p < .000001),];res3$Chr<-"3";res3$d<-res3$d/1000
-res4<-res$by.LG[[4]];res4<-res4[which(res4$p < .000001),];res4$Chr<-"4";res4$d<-res4$d/1000
-res5<-res$by.LG[[5]];res5<-res5[which(res5$p < .000001),];res5$Chr<-"5";res5$d<-res5$d/1000
-res6<-res$by.LG[[6]];res6<-res6[which(res6$p < .000001),];res6$Chr<-"6";res6$d<-res6$d/1000
-res7<-res$by.LG[[7]];res7<-res7[which(res7$p < .000001),];res7$Chr<-"7";res7$d<-res7$d/1000
-res8<-res$by.LG[[8]];res8<-res8[which(res8$p < .000001),];res8$Chr<-"8";res8$d<-res8$d/1000
-res9<-res$by.LG[[9]];res9<-res9[which(res9$p < .000001),];res9$Chr<-"9";res9$d<-res9$d/1000
-res10<-res$by.LG[[10]];res10<-res10[which(res10$p < .000001),];res10$Chr<-"10";res10$d<-res10$d/1000
-res11<-res$by.LG[[11]];res11<-res11[which(res11$p < .000001),];res11$Chr<-"11";res11$d<-res11$d/1000
-res12<-res$by.LG[[12]];res12<-res12[which(res12$p < .000001),];res12$Chr<-"12";res12$d<-res12$d/1000
-res13<-res$by.LG[[13]];res13<-res13[which(res13$p < .000001),];res13$Chr<-"13";res13$d<-res13$d/1000
-res14<-res$by.LG[[14]];res14<-res14[which(res14$p < .000001),];res14$Chr<-"14";res14$d<-res14$d/1000
-res15<-res$by.LG[[15]];res15<-res15[which(res15$p < .000001),];res15$Chr<-"15";res15$d<-res15$d/1000
-res16<-res$by.LG[[16]];res16<-res16[which(res16$p < .000001),];res16$Chr<-"16";res16$d<-res16$d/1000
-res17<-res$by.LG[[17]];res17<-res17[which(res17$p < .000001),];res17$Chr<-"17";res17$d<-res17$d/1000
-res18<-res$by.LG[[18]];res18<-res18[which(res18$p < .000001),];res18$Chr<-"18";res18$d<-res18$d/1000
+res1<-res$by.LG[[1]];res1<-res1[which(res1$p < .000001),];res1$Chr<-"CHR 1";res1$d<-res1$d/1000000
+res2<-res$by.LG[[2]];res2<-res2[which(res2$p < .000001),];res2$Chr<-"CHR 2";res2$d<-res2$d/1000000
+res3<-res$by.LG[[3]];res3<-res3[which(res3$p < .000001),];res3$Chr<-"CHR 3";res3$d<-res3$d/1000000
+res4<-res$by.LG[[4]];res4<-res4[which(res4$p < .000001),];res4$Chr<-"CHR 4";res4$d<-res4$d/1000000
+res5<-res$by.LG[[5]];res5<-res5[which(res5$p < .000001),];res5$Chr<-"CHR 5";res5$d<-res5$d/1000000
+res6<-res$by.LG[[6]];res6<-res6[which(res6$p < .000001),];res6$Chr<-"CHR 6";res6$d<-res6$d/1000000
+res7<-res$by.LG[[7]];res7<-res7[which(res7$p < .000001),];res7$Chr<-"CHR 7";res7$d<-res7$d/1000000
+res8<-res$by.LG[[8]];res8<-res8[which(res8$p < .000001),];res8$Chr<-"CHR 8";res8$d<-res8$d/1000000
+res9<-res$by.LG[[9]];res9<-res9[which(res9$p < .000001),];res9$Chr<-"CHR 9";res9$d<-res9$d/1000000
+res10<-res$by.LG[[10]];res10<-res10[which(res10$p < .000001),];res10$Chr<-"CHR 10";res10$d<-res10$d/1000000
+res11<-res$by.LG[[11]];res11<-res11[which(res11$p < .000001),];res11$Chr<-"CHR 11";res11$d<-res11$d/1000000
+res12<-res$by.LG[[12]];res12<-res12[which(res12$p < .000001),];res12$Chr<-"CHR 12";res12$d<-res12$d/1000000
+res13<-res$by.LG[[13]];res13<-res13[which(res13$p < .000001),];res13$Chr<-"CHR 13";res13$d<-res13$d/1000000
+res14<-res$by.LG[[14]];res14<-res14[which(res14$p < .000001),];res14$Chr<-"CHR 14";res14$d<-res14$d/1000000
+res15<-res$by.LG[[15]];res15<-res15[which(res15$p < .000001),];res15$Chr<-"CHR 15";res15$d<-res15$d/1000000
+res16<-res$by.LG[[16]];res16<-res16[which(res16$p < .000001),];res16$Chr<-"CHR 16";res16$d<-res16$d/1000000
+res17<-res$by.LG[[17]];res17<-res17[which(res17$p < .000001),];res17$Chr<-"CHR 17";res17$d<-res17$d/1000000
+res18<-res$by.LG[[18]];res18<-res18[which(res18$p < .000001),];res18$Chr<-"CHR 18";res18$d<-res18$d/1000000
 ```
 
 ```{r}
@@ -146,19 +174,20 @@ res_all_chr<-rbind(res1,res2,res3,res4,res5,res6,res7,res8,res9,res10,res11,res1
 #
 ###########################################
 ```{r}
-res_all_chr$Chr= factor(res_all_chr$Chr, levels = c('1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18'))
+res_all_chr$Chr= factor(res_all_chr$Chr, levels = c('CHR 1','CHR 2','CHR 3','CHR 4','CHR 5','CHR 6','CHR 7','CHR 8','CHR 9','CHR 10','CHR 11','CHR 12','CHR 13','CHR 14','CHR 15','CHR 16','CHR 17','CHR 18'))
   
   
 ggplot(res_all_chr, aes(x=d, y=r2,group=Chr, fill=Chr)) +
   geom_point(alpha=0.7, size=.3, shape=21, fill='grey30',colour='lightblue' ) +
-  geom_smooth(method=loess, se = FALSE)+
-  scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue","darkorange","black",
-                            "red","blue","yellow","darkviolet","coral3","ivory4",
-                            "maroon4","yellowgreen","steelblue4","plum4","tan4","deeppink"
-                            ,"goldenrod"))+
-  scale_x_continuous(breaks = seq(0, 60000,5000))+
+  geom_smooth(stat = "smooth", method='loess', se=FALSE)+
+  #scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue","darkorange","black",
+  #                          "red","blue","yellow","darkviolet","coral3","ivory4",
+  #                          "maroon4","yellowgreen","steelblue4","plum4","tan4","deeppink"
+  #                          ,"goldenrod"))+
+  scale_x_continuous(breaks = seq(0, 33,5))+
+  scale_y_continuous(breaks = seq(0, 1.0,0.1))+
   facet_wrap(. ~ Chr, labeller = label_glue('({.L})   {Chr}'),ncol = 9) +
-    xlab('Distance (Kb)') +
+    xlab('Distance (Mb)') +
   ylab(expression (paste ('', r^2, ''))) +
   #ggtitle("Linkage Disequilibrium") +
   theme(strip.text = element_text(size=12,family="serif",face="bold"))+
