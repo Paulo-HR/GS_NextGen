@@ -1,0 +1,1242 @@
+---
+title: "20_Plot _comparing_crosses_population"
+author: "Paulo-HR"
+date: "2023-11-27"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+#################
+#
+## Introduction
+#
+#################
+```{r}
+library(genomicMateSelectR)
+library(reshape2)
+library(ggplot2)
+library(ggpubr)
+library(patchwork)
+```
+
+
+############################
+#
+## Reading the results
+#
+############################
+
+################
+#
+## GBLUP values
+#
+################
+
+###################
+#
+## Additive model
+#
+###################
+```{r}
+gpredsA<-readRDS(here::here("output","genomicPredictions_additive.rds"))
+```
+
+
+########################
+#
+## Non additive model
+#
+########################
+```{r}
+gpredsAD<-readRDS(here::here("output","genomicPredictions_additive_plus_dominance.rds"))
+```
+
+
+#################################
+#
+## Directional dominance model
+#
+#################################
+```{r}
+gpredsDirDom<-readRDS(here::here("output","genomicPredictions_directional_dominance.rds"))
+```
+
+#########################################################
+#
+## Pull out data genomic predictions for the population
+#
+#########################################################
+
+###################
+#
+## Additive model
+#
+###################
+```{r}
+table_add<-gpredsA$gblups[[1]]
+table_add$POP<-"Original population"
+table_add=reshape2::melt(table_add, id.vars=c("GID", "predOf","POP"))
+table_add<-table_add[,c(1,3:5)]
+table_add$Model<-"Additive"
+colnames(table_add)<-c("clone","pop","trait","value","model")
+head(table_add)
+```
+
+
+########################
+#
+## Non additive model
+#
+########################
+```{r}
+table_non_add<-gpredsAD$gblups[[1]]
+table_non_add$POP<-"Original population"
+table_non_add<-reshape2::melt(table_non_add, id.vars=c("GID", "predOf","POP"))
+table_non_add<-table_non_add%>%filter(predOf =="GETGV")
+table_non_add<-table_non_add[,c(1,3:5)]
+table_non_add$Model<-"Non additive"
+colnames(table_non_add)<-c("clone","pop","trait","value","model")
+head(table_non_add)
+```
+
+
+########################
+#
+## Directional model
+#
+########################
+```{r}
+table_DirDom<-gpredsDirDom$gblups[[1]]
+table_DirDom$POP<-"Original population"
+table_DirDom<-reshape2::melt(table_DirDom, id.vars=c("GID", "predOf","POP"))
+table_DirDom<-table_DirDom%>%filter(predOf =="GETGV")
+table_DirDom<-table_DirDom[,c(1,3:5)]
+table_DirDom$Model<-"Directional dominance"
+colnames(table_DirDom)<-c("clone","pop","trait","value","model")
+head(table_DirDom)
+```
+
+#######################
+#
+## Crosses estimates
+#
+#######################
+
+###################
+#
+## Additive Model
+#
+###################
+```{r}
+crossPredsA<-readRDS(here::here("output","cross_genomicPredictions_additive.rds"))
+```
+
+
+########################
+#
+## Non additive Model
+#
+########################
+```{r}
+crossPredsAD<-readRDS(here::here("output","cross_genomicPredictions_non_additive.rds"))
+```
+
+
+#################################
+#
+## Directional dominance Model
+#
+#################################
+```{r}
+crossPredsDirDom<-readRDS(here::here("output","cross_genomicPredictions_directional_dominance.rds"))
+```
+
+
+###################
+#
+## Crossing plan
+#
+##################
+
+## Selecting the top 500 clones by index selection
+
+###################
+#
+## Additive model
+#
+###################
+```{r}
+top500crosses_A<-crossPredsA$tidyPreds[[1]]
+
+## Creating column identifying self-pollination
+top500crosses_A$type <- ifelse(top500crosses_A$sireID ==top500crosses_A$damID, top500crosses_A$Trait, "FALSE")
+
+## Removing self-pollination
+top500crosses_A<-subset(top500crosses_A,top500crosses_A$type=="FALSE")
+
+
+top500crosses_A<-top500crosses_A%>% 
+     filter(Trait=="SELIND") %>% 
+     dplyr::select(-predVar) %>% 
+     arrange(desc(predUsefulness)) %>% 
+     slice(1:500)
+top500crosses_A<-top500crosses_A[,c(1:2)]
+head(top500crosses_A)
+```
+
+
+#######################
+#
+## Non additive model
+#
+#######################
+```{r}
+top500crosses_AD<-crossPredsAD$tidyPreds[[1]]
+
+## Creating column identifying self-pollination
+top500crosses_AD$type <- ifelse(top500crosses_AD$sireID ==top500crosses_AD$damID, top500crosses_AD$Trait, "FALSE")
+
+## Removing self-pollination
+top500crosses_AD<-subset(top500crosses_AD,top500crosses_AD$type=="FALSE")
+
+top500crosses_AD<-top500crosses_AD%>% 
+     filter(predOf =="TGV")%>%
+     filter(Trait=="SELIND") %>% 
+     dplyr::select(-predVar) %>% 
+     arrange(desc(predUsefulness)) %>% 
+     slice(1:500)
+top500crosses_AD<-top500crosses_AD[,c(1:2)]
+head(top500crosses_AD)
+```
+
+
+
+#################################
+#
+## Directional dominance model
+#
+#################################
+```{r}
+top500crosses_DirDom<-crossPredsDirDom$tidyPreds[[1]]
+
+## Creating column identifying self-pollination
+top500crosses_DirDom$type <- ifelse(top500crosses_DirDom$sireID ==top500crosses_DirDom$damID, top500crosses_DirDom$Trait, "FALSE")
+
+## Removing self-pollination
+top500crosses_DirDom<-subset(top500crosses_DirDom,top500crosses_DirDom$type=="FALSE")
+
+top500crosses_DirDom<-crossPredsDirDom$tidyPreds[[1]] %>% 
+     filter(predOf =="TGV")%>%
+     filter(Trait=="SELIND") %>% 
+     dplyr::select(-predVar) %>% 
+     arrange(desc(predUsefulness)) %>% 
+     slice(1:500)
+top500crosses_DirDom<-top500crosses_DirDom[,c(1:2)]
+head(top500crosses_DirDom)
+```
+
+###################################################
+#
+## How many parents there are in each data set
+#
+###################################################
+
+####################
+#
+## Additive model
+#
+####################
+```{r}
+#male
+sireID_A<-as.data.frame(top500crosses_A$sireID)
+colnames(sireID_A)<-"cross"
+sireID_A %>%
+  summarise(n = length(unique(cross)))
+
+# female
+damID_A<-as.data.frame(top500crosses_A$damID)
+colnames(damID_A)<-"cross"
+damID_A %>%
+  summarise(n = length(unique(cross)))
+
+## all
+all_A<-merge(sireID_A,damID_A, by=c("cross"))
+all_A%>%
+  summarise(n = length(unique(cross)))
+```
+
+
+#######################
+#
+## Non additive model
+#
+#######################
+```{r}
+#male
+sireID_AD<-as.data.frame(top500crosses_AD$sireID)
+colnames(sireID_AD)<-"cross"
+sireID_AD %>%
+  summarise(n = length(unique(cross)))
+
+# female
+damID_AD<-as.data.frame(top500crosses_AD$damID)
+colnames(damID_AD)<-"cross"
+damID_AD %>%
+  summarise(n = length(unique(cross)))
+
+## all
+all_AD<-merge(sireID_AD,damID_AD, by=c("cross"))
+all_AD%>%
+  summarise(n = length(unique(cross)))
+```
+
+
+
+#################################
+#
+## Directional dominance model
+#
+#################################
+```{r}
+#male
+sireID_DirDom<-as.data.frame(top500crosses_DirDom$sireID)
+colnames(sireID_DirDom)<-"cross"
+sireID_DirDom %>%
+  summarise(n = length(unique(cross)))
+
+# female
+damID_DirDom<-as.data.frame(top500crosses_DirDom$damID)
+colnames(damID_DirDom)<-"cross"
+damID_DirDom %>%
+  summarise(n = length(unique(cross)))
+
+## all
+all_DirDom<-merge(sireID_DirDom,damID_DirDom, by=c("cross"))
+all_DirDom%>%
+  summarise(n = length(unique(cross)))
+```
+
+
+#####################################################################
+#
+## Creating a data frame with all the traits for the new population
+#
+#####################################################################
+
+###################
+#
+## Additive Model
+#
+###################
+```{r}
+crossPredsA_sel<-crossPredsA$tidyPreds[[1]]
+head(crossPredsA_sel)
+```
+
+
+#######################
+#
+## Non additive Model
+#
+#######################
+```{r}
+crossPredsAD_sel<-crossPredsAD$tidyPreds[[1]] %>% 
+     filter(predOf =="TGV")
+head(crossPredsAD_sel)
+```
+
+
+################################
+#
+## Directional dominance Model
+#
+################################
+```{r}
+crossPredsDirDom_sel<-crossPredsDirDom$tidyPreds[[1]] %>% 
+     filter(predOf =="TGV")
+head(crossPredsDirDom_sel)
+```
+
+###############################################################################
+#
+## Combining the dataframes and getting a data frame with the new population
+#
+###############################################################################
+
+###################
+#
+## Additive model
+#
+###################
+```{r}
+select_A<- merge(crossPredsA_sel, top500crosses_A,
+                       by = c("sireID","damID" ))
+select_A$pop<-"Crosses"
+select_A$model<-"Additive"
+select_A<-select_A[,c(1,2,10,11,5,6)]
+colnames(select_A)<-c("sireID", "damID","pop","model","trait","value")
+head(select_A)
+```
+
+
+#######################
+#
+## Non additive model
+#
+#######################
+```{r}
+select_AD<- merge(crossPredsAD_sel, top500crosses_AD,
+                       by = c("sireID","damID" ))
+select_AD$pop<-"Crosses"
+select_AD$model<-"Non additive"
+select_AD<-select_AD[,c(1,2,10,11,5,6)]
+colnames(select_AD)<-c("sireID","damID","pop","model","trait","value")
+head(select_AD)
+```
+
+
+################################
+#
+## Directional dominance model
+#
+################################
+```{r}
+select_DirDom<- merge(crossPredsDirDom_sel, top500crosses_DirDom,
+                       by = c("sireID","damID" ))
+select_DirDom$pop<-"Crosses"
+select_DirDom$model<-"Directional dominance"
+select_DirDom<-select_DirDom[,c(1,2,10,11,5,6)]
+colnames(select_DirDom)<-c("sireID","damID","pop","model","trait","value")
+head(select_DirDom)
+```
+
+
+##########################
+#
+## Merging data frames
+#
+##########################
+```{r}
+## removing the first/two first column 
+select_A1<-select_A[,-c(1:2)]
+table_add1<-table_add[,-c(1)]
+select_AD1<-select_AD[,-c(1:2)]
+table_non_add1<-table_non_add[,-c(1)]
+select_DirDom1<-select_DirDom[,-c(1:2)]
+table_DirDom1<-table_DirDom[,-c(1)]
+
+
+table_final=rbind(select_A1,table_add1,select_AD1,table_non_add1,select_DirDom1,table_DirDom1)
+head(table_final)
+```
+
+##################################################################
+#
+## Data frame by trait (Original population + new population)
+#
+##################################################################
+```{r}
+DMCg<-table_final%>%filter(trait=="DMCg")
+CWLSD<-table_final%>%filter(trait=="CWLSD")
+CBroLS<-table_final%>%filter(trait=="CBroLS")
+CBliLS<-table_final%>%filter(trait=="CBliLS")
+StC<-table_final%>%filter(trait=="StC")
+PA<-table_final%>%filter(trait=="PA")
+logFRY<-table_final%>%filter(trait=="logFRY")
+logFSY<-table_final%>%filter(trait=="logFSY")
+SELIND<-table_final%>%filter(trait=="SELIND")
+```
+
+
+#########
+#
+## DMCg
+#
+#########
+```{r}
+# ordering by model
+DMCg$pop= factor(DMCg$pop, levels = c("Original population", "Crosses"))
+DMCg$model= factor(DMCg$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+a= ggplot(DMCg,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("DMCg")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ a
+```
+
+##########
+#
+## CWLSD
+#
+##########
+```{r}
+CWLSD$pop= factor(CWLSD$pop, levels = c("Original population", "Crosses"))
+CWLSD$model= factor(CWLSD$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+b= ggplot(CWLSD,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("CWLSD")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ b
+```
+
+
+
+##########
+#
+## CBroLS
+#
+##########
+```{r}
+CBroLS$pop= factor(CBroLS$pop, levels = c("Original population", "Crosses"))
+CBroLS$model= factor(CBroLS$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+c= ggplot(CBroLS,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("CBroLS")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ c
+```
+
+
+
+
+##########
+#
+## CBliLS
+#
+##########
+```{r}
+CBliLS$pop= factor(CBliLS$pop, levels = c("Original population", "Crosses"))
+CBliLS$model= factor(CBliLS$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+
+d= ggplot(CBliLS,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("CBliLS")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+d
+```
+
+
+
+
+##########
+#
+## StC
+#
+##########
+```{r}
+StC$pop= factor(StC$pop, levels = c("Original population", "Crosses"))
+StC$model= factor(StC$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+e= ggplot(StC,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("StC")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ e
+```
+
+
+##########
+#
+## PA
+#
+##########
+```{r}
+PA$pop= factor(PA$pop, levels = c("Original population", "Crosses"))
+PA$model= factor(PA$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+f= ggplot(PA,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("PA")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ f
+```
+
+
+
+##########
+#
+## logFRY
+#
+##########
+```{r}
+logFRY$pop= factor(logFRY$pop, levels = c("Original population", "Crosses"))
+logFRY$model= factor(logFRY$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+
+g= ggplot(logFRY,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("logFRY")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ g
+```
+
+
+
+
+##########
+#
+## logFSY
+#
+##########
+```{r}
+logFSY$pop= factor(logFSY$pop, levels = c("Original population", "Crosses"))
+logFSY$model= factor(logFSY$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+h= ggplot(logFSY,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("logFSY")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ h
+```
+
+
+
+##########
+#
+## SELIND
+#
+##########
+```{r}
+SELIND$pop= factor(SELIND$pop, levels = c("Original population", "Crosses"))
+SELIND$model= factor(SELIND$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+j= ggplot(SELIND,aes(x=model,y=value,fill=pop)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("SELIND")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ j
+```
+
+
+
+###########################################
+#
+## Arranging the plots in the same window
+#
+###########################################
+```{r}
+figure=a+b+c+d+e+f+g+h+j+ 
+       plot_layout(ncol = 5) + plot_annotation(tag_levels = 'A')+
+       plot_layout(guides = "collect")&
+       theme(legend.position = "bottom")
+
+figure
+```
+
+
+#################
+#
+## Saving plot
+#
+#################
+```{r}
+ggexport(figure,width = 800,
+  height = 600, filename = "boxplot_GEBV_selected_new_crosses.png")
+```
+
+
+
+###########################################
+#
+## Data frame by trait without population
+#
+############################################
+```{r}
+DMCgp<-table_final%>%filter(trait=="DMCg")%>%filter(pop!="Population")
+CWLSDp<-table_final%>%filter(trait=="CWLSD")%>%filter(pop!="Population")
+CBroLSp<-table_final%>%filter(trait=="CBroLS")%>%filter(pop!="Population")
+CBliLSp<-table_final%>%filter(trait=="CBliLS")%>%filter(pop!="Population")
+StCp<-table_final%>%filter(trait=="StC")%>%filter(pop!="Population")
+PAp<-table_final%>%filter(trait=="PA")%>%filter(pop!="Population")
+logFRYp<-table_final%>%filter(trait=="logFRY")%>%filter(pop!="Population")
+logFSYp<-table_final%>%filter(trait=="logFSY")%>%filter(pop!="Population")
+SELINDp<-table_final%>%filter(trait=="SELIND")%>%filter(pop!="Population")
+```
+
+
+#########
+#
+## DMCg
+#
+#########
+```{r}
+# ordering by model
+DMCgp$model= factor(DMCgp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+a1= ggplot(DMCgp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("DMCg")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ a1
+```
+
+##########
+#
+## CWLSD
+#
+##########
+```{r}
+CWLSDp$model= factor(CWLSDp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+b1= ggplot(CWLSDp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("CWLSD")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ b1
+```
+
+
+
+##########
+#
+## CBroLS
+#
+##########
+```{r}
+CBroLSp$model= factor(CBroLSp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+c1= ggplot(CBroLSp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("CBroLS")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ c1
+```
+
+
+
+
+##########
+#
+## CBliLS
+#
+##########
+```{r}
+CBliLSp$model= factor(CBliLSp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+
+d1= ggplot(CBliLSp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("CBliLS")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+d1
+```
+
+
+
+
+##########
+#
+## StC
+#
+##########
+```{r}
+StCp$model= factor(StCp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+e1= ggplot(StCp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("StC")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ e1
+```
+
+
+
+
+##########
+#
+## PA
+#
+##########
+```{r}
+PAp$model= factor(PAp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+f1= ggplot(PAp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("PA")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ f1
+```
+
+
+
+##########
+#
+## logFRY
+#
+##########
+```{r}
+logFRYp$model= factor(logFRYp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+
+g1= ggplot(logFRYp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("logFRY")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ g1
+```
+
+
+
+
+##########
+#
+## logFSY
+#
+##########
+```{r}
+logFSYp$model= factor(logFSYp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+h1= ggplot(logFSYp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("logFSY")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ h1
+```
+
+
+
+##########
+#
+## logFSY
+#
+##########
+```{r}
+SELINDp$model= factor(SELINDp$model, levels = c("Additive", "Non additive", "Directional dominance"))
+
+j1= ggplot(SELINDp,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+    # xlab('Model')+
+     ggtitle("SELIND")+
+    # scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non additive" = "AD","Directional dominance" = "DirDom"))+
+  #   scale_y_continuous(limits=c(0.45,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='none',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ j1
+```
+
+###########################################
+#
+## Arranging the plots in the same window
+#
+###########################################
+```{r}
+#require(lemon)
+#grid_arrange_shared_legend(a,b,c,d,e,f,g,h,i, ncol=3, nrow=3, position="bottom")
+
+
+figure1=ggarrange(a1,b1,c1,d1,e1,f1,g1,h1,j1,
+          labels = c("A", "B","C","D","E","F","G","H","I"),
+          ncol=5, nrow=2, common.legend = TRUE, legend="bottom")
+figure1
+```
+
+#################
+#
+## Saving plot
+#
+#################
+```{r}
+ggexport(figure1,width = 800,
+  height = 600, filename = "boxplot_GEBV_selected_new_crosses_without_population.png")
+```
+
+
+
+
