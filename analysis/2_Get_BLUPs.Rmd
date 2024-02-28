@@ -41,6 +41,17 @@ phenos$logFSY=ifelse(phenos$logFSY==-Inf, 0, phenos$logFSY)
 phenos$CBliLS=ifelse(phenos$CBliLS==6, 5, phenos$CBliLS)
 ```
 
+
+##########################
+#
+## fixing the clone name
+#
+##########################
+```{r}
+
+phenos$germplasmName=ifelse(phenos$germplasmName=='BGM-06111', 'BGM-0611', phenos$germplasmName)
+```
+
 ##############################
 #
 ## Set-up training datasets
@@ -541,7 +552,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "98103-08"="X98.103.08",
 "Abacaxi"="BR.22.DArT.PL22_F05...Abacaxi",
 "Aciolina"="Aciolina",
-"Aipim-Abacate"="Aipim.Abacate",
 "Aipim-Abacate-2"="Aipim.Abacate.2",
 "Aipim-Brasilia"="Aipim.Brasilia",
 "Aipim-Eucalipto-NV"="Aipim.Eucalipto.NV",
@@ -646,20 +656,14 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0144"="BGM.0144",
 "BGM-0145"="BGM.0145",
 "BGM-0150"="BGM.0150",
-"BGM-0150-A"="BGM.0150A",
-"BGM-0150-B"="BGM.0150.B",
 "BGM-0151"="BGM.0151",
 "BGM-0152"="BGM.0152",
-"BGM-0152-A"="BGM.0152A",
-"BGM-0152-B"="BGM.0152.B",
 "BGM-0155"="BGM.0155",
 "BGM-0156"="BGM.0156",
 "BGM-0157"="BGM.0157",
 "BGM-0160"="BGM.0160",
 "BGM-0161"="BGM.0161",
 "BGM-0162"="BGM.0162",
-"BGM-0162-A"="BGM.0162.A",
-"BGM-0162-B"="BGM.0162.B",
 "BGM-0163"="BGM.0163",
 "BGM-0164"="BGM.0164",
 "BGM-0165"="BGM.0165",
@@ -814,13 +818,11 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0449"="BGM.0449",
 "BGM-0451"="BGM.0451",
 "BGM-0452"="BGM.0452",
-"BGM-0452-1"="BGM.0452.1",
 "BGM-0456"="BGM.0456",
 "BGM-0460"="BGM.0460",
 "BGM-0461"="BGM.0461",
 "BGM-0462"="BGM.0462",
 "BGM-0463"="BGM.0463",
-"BGM-0463/0780"="BR.20.DArT.PL22_F10...BGM.0463.0780",
 "BGM-0464"="BGM.0464",
 "BGM-0465"="BGM.0465",
 "BGM-0467"="BGM.0467",
@@ -895,7 +897,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0607"="BGM.0607",
 "BGM-0609"="BGM.0609",
 "BGM-0611"="BGM.0611",
-"BGM-06111"="BGM.06111",
 "BGM-0614"="BGM.0614",
 "BGM-0615"="BGM.0615",
 "BGM-0618"="BGM.0618",
@@ -959,8 +960,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0778"="BGM.0778",
 "BGM-0779"="BGM.0779",
 "BGM-0780"="BGM.0780",
-"BGM-0780-B"="BGM.0780.B.",
-"BGM-0780-E"="BGM.0780.E.",
 "BGM-0781"="BGM.0781",
 "BGM-0783"="BGM.0783",
 "BGM-0785"="BGM.0785",
@@ -1036,7 +1035,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0929"="BGM.0929.",
 "BGM-0930"="BGM.0930",
 "BGM-0931"="BGM.0931",
-"BGM-0931-T"="BR.20.DArT.PL22_B11...BGM.0931.T",
 "BGM-0933"="BR.22.DArT.PL22_G05...BGM.0933",
 "BGM-0934"="BGM.0934",
 "BGM-0935"="BGM.0935",
@@ -1194,8 +1192,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-1255"="BGM.1255",
 "BGM-1259"="BGM.1259",
 "BGM-1262"="BGM.1262",
-"BGM-1262-C"="BGM.1262C",
-"BGM-1262-E"="BGM.1262E",
 "BGM-1263"="BGM.1263",
 "BGM-1265"="BGM.1265",
 "BGM-1267"="BGM.1267",
@@ -1311,7 +1307,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-1498"="BGM.1498",
 "BGM-1499"="BGM.1499",
 "BGM-1502"="BGM.1502",
-"BGM-1502-M"="BGM.1502.M.",
 "BGM-1503"="BGM.1503",
 "BGM-1507"="BGM.1507",
 "BGM-1508"="BGM.1508",
@@ -1419,7 +1414,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-1718"="BGM.1718",
 "BGM-1721"="BGM.1721",
 "BGM-1722"="BGM.1722",
-"BGM-1722-D"="BGM.1722.D.",
 "BGM-1723"="BGM.1723",
 "BGM-1725"="BGM.1725",
 "BGM-1726"="BGM.1726",
@@ -1448,7 +1442,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-1756"="BGM.1756",
 "BGM-1757"="BGM.1757",
 "BGM-1759"="BGM.1759",
-"BGM-1759-B"="BGM.1759.B.",
 "BGM-1760"="BR.SET1.18.BGM.1760.1.182",
 "BGM-1761"="BGM.1761",
 "BGM-1762"="BGM.1762",
@@ -7726,7 +7719,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "CL-Acre"="CL.Acre",
 "CL-Rangel"="CL.Rangel",
 "Conquista-1"="Conquista.1",
-"Conquista-2"="Conquista.2",
 "CPAFRO-03"="CPAFRO.03",
 "CPAFRO-04"="CPAFRO.04",
 "CPAFRO-05"="CPAFRO.05",
@@ -7812,7 +7804,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "TMS 96/1089A"="BR.22.DArT.PL22_D08...TME.96",
 "TZ-130"="BR.22.DArT.PL22_C08...TZ.130",
 "Uberlandia-2"="Uberlandia.2",
-"Uberlandia-3"="Uberlandia.3",
 "Vassourinha-branca"="Vassourinha.branca",
 "Vassourinha-CCAufes"="Vassourinha.CCAufes."))
 }
