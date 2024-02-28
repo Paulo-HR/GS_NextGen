@@ -1,0 +1,647 @@
+---
+title: "25_Plot_ParentalWise_Cross_validation"
+author: "Paulo-HR"
+date: "2024-02-05"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+## Introduction
+
+```{r}
+library(genomicMateSelectR)
+library(ggplot2)
+library(patchwork)
+```
+
+
+
+#####################
+#
+## Loading dataset
+#
+#####################
+```{r}
+## Additive model
+parentWiseCV_add<-readRDS(here::here("output","parentWiseCV_additive.rds"))
+
+## Additive+Dominance
+parentWiseCV_AD<-readRDS(here::here("output","parentWiseCV_non_additive.rds"))
+
+## Directional Dominance
+parentWiseCV_DirDom<-readRDS(here::here("output","parentWiseCV_directional_dominance.rds"))
+```
+
+##############################
+#
+##  Seeing meanPredAccuracy
+#
+##############################
+```{r}
+parent_add <- parentWiseCV_add$meanPredAccuracy; parent_add$model <- "Additive"
+parent_AD<- parentWiseCV_AD$meanPredAccuracy; parent_AD$model <- "Non Additive"
+parent_DirDom <- parentWiseCV_DirDom$meanPredAccuracy; parent_DirDom$model <- "Directional Dominance"
+```
+
+#################
+#
+## Final Table
+#
+#################
+```{r}
+table_final <- rbind(parent_add,parent_AD, parent_DirDom)
+table_final1 <- table_final[,c(5,8,7)]
+colnames(table_final1) <- c("trait", "model", "value")
+```
+
+
+################################################
+# 
+## Function to estimate de mean Accuracy
+#
+#################################################
+```{r}
+
+data_summary <- function(data, varname, groupnames){
+  require(plyr)
+  summary_func <- function(x, col){
+    c(mean = mean(x[[col]], na.rm=TRUE),
+      sd = sd(x[[col]], na.rm=TRUE),
+      EP = (sd(x[[col]]/sqrt(length(x[[col]])), na.rm=TRUE)))
+  }
+  data_sum<-ddply(data, groupnames, .fun=summary_func,
+                  varname)
+  data_sum <- rename(data_sum, c("mean" = varname))
+  return(data_sum)
+}
+```
+
+
+##################################
+#
+## Accuracy mean
+#
+##################################
+```{r}
+
+df0 <- data_summary(table_final1, varname="value", 
+                    groupnames=c("trait", "model"))
+df0
+```
+
+###############################################
+#
+## Plotting Accuracy Predicting Family Means
+#
+###############################################
+```{r}
+table_final1$trait= factor(table_final1$trait, levels = c("DMCg","CWLSD","CBroLS","CBliLS", "StC", "PA","logFRY","logFSY","SELIND"))
+
+table_final1$model= factor(table_final1$model, levels = c("Additive","Non Additive","Directional Dominance"))
+
+     ggplot(table_final1,aes(x=trait,y=value,fill=model)) + 
+    # labs(title="Accuracy Predicting Family Means")+
+     xlab("Trait")+
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot() + 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+     scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue", "orange"))+
+    # scale_x_discrete(labels=c("DMCg" = "DMCg", "StC" = "StC", "PA"="PA", "logFRY"="FRY","logFSY"="FSY","SELIND"="SELIND"))+
+  theme(plot.title = element_text(hjust = 0.5)) +
+     scale_y_continuous(limits=c(-0.8,1),breaks = c(-0.8, -0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0))+
+     theme(strip.text = element_text(hjust = -0, size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif",),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='bottom',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+```
+
+
+################################
+#
+## Separating dataset by trait
+#
+################################
+
+#########
+#
+## DMCg
+#
+#########
+```{r}
+DMCg=table_final1 %>%
+     filter(trait=="DMCg")
+```
+
+#########
+#
+## CWLSD
+#
+#########
+```{r}
+CWLSD=table_final1 %>%
+  filter(trait=="CWLSD")
+```
+
+
+#########
+#
+## CBroLS
+#
+#########
+```{r}
+CBroLS=table_final1 %>%
+  filter(trait=="CBroLS")
+```
+
+
+#########
+#
+## CBliLS
+#
+#########
+```{r}
+CBliLS=table_final1 %>%
+  filter(trait=="CBliLS")%>% drop_na()
+```
+
+
+#########
+#
+## StC
+#
+#########
+```{r}
+StC=table_final1%>%
+     filter(trait=="StC")
+```
+
+#########
+#
+## PA
+#
+#########
+```{r}
+PA=table_final1 %>%
+     filter(trait=="PA")
+```
+
+#########
+#
+## FRY
+#
+#########
+```{r}
+FRY=table_final1 %>%
+     filter(trait=="logFRY")
+```
+
+#########
+#
+## FSY
+#
+#########
+```{r}
+FSY=table_final1%>%
+     filter(trait=="logFSY")
+```
+
+#########
+#
+## SELIND
+#
+#########
+```{r}
+SELIND=table_final1 %>%
+     filter(trait=="SELIND")
+```
+
+###########
+#
+## Plots
+#
+###########
+
+#########
+#
+## DMCg
+#
+#########
+```{r}
+# ordering by model
+DMCg$model= factor(DMCg$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+ a=ggplot(DMCg,aes(x=model,y=value,fill=model)) + 
+     stat_boxplot(geom = "errorbar") +
+     geom_boxplot()+ 
+     stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+     scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+     xlab('Model')+
+     ggtitle("DMCg")+
+     theme_update(plot.title = element_text(hjust = 0.5))+
+     scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+#     scale_y_continuous(limits=c(0.44,0.7),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8))+
+     theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+     theme(axis.text.x = element_text(size=12,family="serif"))+
+     theme(axis.text.y = element_text(size=12,family="serif"))+
+     theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+          axis.title.y = element_text(color="black", size=12,family="serif"),
+          legend.key.size = unit(0.5, "cm"),
+          legend.position='bottom',
+          legend.title = element_blank(),
+          legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+          legend.key = element_rect(colour = "transparent", fill = "white"),
+          #panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+          panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+ 
+ a
+```
+
+##########
+#
+## CWLSD
+#
+##########
+```{r}
+# ordering by model
+CWLSD$model= factor(CWLSD$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+b=ggplot(CWLSD,aes(x=model,y=value,fill=model)) + 
+  stat_boxplot(geom = "errorbar") +
+  geom_boxplot()+ 
+  stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+  scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+  xlab('Model')+
+  ggtitle("CWLSD")+
+  theme_update(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+  #scale_y_continuous(limits=c(0.1,0.4),breaks = c(0,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+b
+```
+
+
+
+#########
+#
+## CBroLS
+#
+#########
+```{r}
+# ordering by model
+CBroLS$model= factor(CBroLS$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+c=ggplot(CBroLS,aes(x=model,y=value,fill=model)) + 
+  stat_boxplot(geom = "errorbar") +
+  geom_boxplot()+ 
+  stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+  scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+  xlab('Model')+
+  ggtitle("CBroLS")+
+  theme_update(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+  #scale_y_continuous(limits=c(-0.01,0.3),breaks = c(-0.05,0,0.05,0.1,0.15,0.2,0.25,0.3))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+c
+```
+
+
+
+#########
+#
+## CBliLS
+#
+#########
+```{r}
+# ordering by model
+CBliLS$model= factor(CBliLS$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+d=ggplot(CBliLS,aes(x=model,y=value,fill=model)) + 
+  stat_boxplot(geom = "errorbar") +
+  geom_boxplot()+ 
+  stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+  scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+  xlab('Model')+
+  ggtitle("CBliLS")+
+  theme_update(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+  #scale_y_continuous(limits=c(-0.03,0.27),breaks = c(-0.05,0,0.05,0.1,0.15,0.2,0.25,0.3,0.35))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+d
+```
+
+
+#########
+#
+## StC
+#
+#########
+```{r}
+# ordering by model
+StC$model= factor(StC$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+e=ggplot(StC,aes(x=model,y=value,fill=model)) + 
+  stat_boxplot(geom = "errorbar") +
+  geom_boxplot()+ 
+  stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+  scale_fill_manual(values=c("chartreuse3", "firebrick","dodgerblue"))+
+  xlab('Model')+
+  ggtitle("StC")+
+  theme_update(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+  #scale_y_continuous(limits=c(0.15,0.55),breaks = c(0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+e
+```
+
+
+#########
+#
+## PA
+#
+#########
+```{r}
+# ordering by model
+PA$model= factor(PA$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+f=ggplot(PA,aes(x=model,y=value,fill=model)) + 
+  stat_boxplot(geom = "errorbar") +
+  geom_boxplot()+ 
+  stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+  scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+  xlab('Model')+
+  ggtitle("PA")+
+  theme_update(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+  #scale_y_continuous(limits=c(0.35,0.6),breaks = c(0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size =8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+f
+```
+
+
+#########
+#
+## FRY
+#
+#########
+```{r}
+# ordering by model
+FRY$model= factor(FRY$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+g=ggplot(FRY,aes(x=model,y=value,fill=model)) + 
+  stat_boxplot(geom = "errorbar") +
+  geom_boxplot()+ 
+  stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+  scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+  xlab('Model')+
+  ggtitle('logFRY')+
+  theme_update(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+  #scale_y_continuous(limits=c(0.2,0.6),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+g
+```
+
+
+#########
+#
+## FSY
+#
+#########
+```{r}
+# ordering by model
+FSY$model= factor(FSY$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+h=ggplot(FSY,aes(x=model,y=value,fill=model)) + 
+  stat_boxplot(geom = "errorbar") +
+  geom_boxplot()+ 
+  stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+  scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+  xlab('Model')+
+  ggtitle("logFSY")+
+  theme_update(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+  #scale_y_continuous(limits=c(0.34,0.61),breaks = c(0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+h
+```
+
+
+#########
+#
+## SELIND
+#
+#########
+```{r}
+# ordering by model
+SELIND$model= factor(SELIND$model, levels = c("Additive", "Non Additive", "Directional Dominance"))
+
+i=ggplot(SELIND,aes(x=model,y=value,fill=model)) + 
+  stat_boxplot(geom = "errorbar") +
+  geom_boxplot()+ 
+  stat_summary(fun="mean", geom="point", size=2,shape=8,
+               position=position_dodge(width=0.75), color="black")+ 
+  scale_fill_manual(values=c( "chartreuse3", "firebrick","dodgerblue"))+
+  xlab('Model')+
+  ggtitle("SELIND")+
+  theme_update(plot.title = element_text(hjust = 0.5))+
+  scale_x_discrete(labels=c("Additive" = "A", "Non Additive" = "AD","Directional Dominance" = "DirDom"))+
+  #scale_y_continuous(limits=c(0.69,0.85),breaks = c(0.7,0.725,0.75,0.775,0.8,0.825,0.85,0.875,0.9))+
+  theme(strip.text = element_text(size=12,family="serif",face="bold"))+
+  theme(axis.text.x = element_text(size=12,family="serif"))+
+  theme(axis.text.y = element_text(size=12,family="serif"))+
+  theme(axis.title.x = element_text(color="black", size=12,family="serif"),
+        axis.title.y = element_text(color="black", size=12,family="serif"),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position='bottom',
+        legend.title = element_blank(),
+        legend.text = element_text(colour = "black", size = 8,family="serif", face="bold"),
+        legend.key = element_rect(colour = "transparent", fill = "white"),
+        #panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.grid.major =element_line(color= "grey80", linetype = "solid", linewidth = 0.4),
+        panel.background = element_rect(fill = "white",
+                                        colour = "grey80"))
+
+i
+```
+
+###########################################
+#
+## Arranging the plots in the same window
+#
+###########################################
+```{r}
+figure=a+b+c+d+e+f+g+h+i+ 
+       plot_layout(ncol = 5) + plot_annotation(tag_levels = 'A')+
+       plot_layout(guides = "collect")&
+       theme(legend.position = "bottom")
+
+figure
+```
+
+
+
+#################
+#
+## Saving plot
+#
+#################
+```{r}
+ggexport(figure,width = 800,
+  height = 600, filename = "boxplot_accuracy.png")
+```
+
+
+```{r}
+#require(lemon)
+#grid_arrange_shared_legend(a,b,c,d,e,f,g,h,i, ncol=5, nrow=2, position="bottom")
+
+
+#figure=ggarrange(a,b,c,d,e,f,g,h,i,
+#          labels = c("A", "B","C","D","E","F","G","H","I"),
+#          ncol=5, nrow=2, common.legend = TRUE, legend="bottom")
+#figure
+```
+
+
+############
+#
+## Average
+#
+############
+```{r}
+#CBliLS%>%
+#  group_by(Model) %>%
+#  summarise_at(vars(Accuracy), list(name = mean))
+```
+
+
