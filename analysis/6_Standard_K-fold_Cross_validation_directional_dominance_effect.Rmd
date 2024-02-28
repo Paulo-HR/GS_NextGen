@@ -58,7 +58,7 @@ dim(A)
 ###################
 ```{r}
 dosages<-readRDS(here::here("data","dosages.rds"))
-#dosages=dosages[order(rownames(dosages)), ]
+dosages=dosages[order(rownames(dosages)), ]
 dim(dosages)
 ```
 
@@ -229,7 +229,7 @@ standardCV2<-runCrossVal(blups=blups,
                         dosages= dosages1,
                         nrepeats=50,nfolds=5,
                         gid="GID",seed=424242,
-                        ncores=24)
+                        ncores=32)
 ```
 
 
