@@ -51,6 +51,17 @@ phenos$logFSY=ifelse(phenos$logFSY==-Inf, 0, phenos$logFSY)
 phenos$CBliLS=ifelse(phenos$CBliLS==6, 5, phenos$CBliLS)
 ```
 
+
+##########################
+#
+## fixing the clone name
+#
+##########################
+```{r}
+
+phenos$germplasmName=ifelse(phenos$germplasmName=='BGM-06111', 'BGM-0611', phenos$germplasmName)
+```
+
 ###################
 #
 ## Subset by trait
@@ -1677,7 +1688,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "98103-08"="X98.103.08",
 "Abacaxi"="BR.22.DArT.PL22_F05...Abacaxi",
 "Aciolina"="Aciolina",
-"Aipim-Abacate"="Aipim.Abacate",
 "Aipim-Abacate-2"="Aipim.Abacate.2",
 "Aipim-Brasilia"="Aipim.Brasilia",
 "Aipim-Eucalipto-NV"="Aipim.Eucalipto.NV",
@@ -1782,20 +1792,14 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0144"="BGM.0144",
 "BGM-0145"="BGM.0145",
 "BGM-0150"="BGM.0150",
-"BGM-0150-A"="BGM.0150A",
-"BGM-0150-B"="BGM.0150.B",
 "BGM-0151"="BGM.0151",
 "BGM-0152"="BGM.0152",
-"BGM-0152-A"="BGM.0152A",
-"BGM-0152-B"="BGM.0152.B",
 "BGM-0155"="BGM.0155",
 "BGM-0156"="BGM.0156",
 "BGM-0157"="BGM.0157",
 "BGM-0160"="BGM.0160",
 "BGM-0161"="BGM.0161",
 "BGM-0162"="BGM.0162",
-"BGM-0162-A"="BGM.0162.A",
-"BGM-0162-B"="BGM.0162.B",
 "BGM-0163"="BGM.0163",
 "BGM-0164"="BGM.0164",
 "BGM-0165"="BGM.0165",
@@ -1950,13 +1954,11 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0449"="BGM.0449",
 "BGM-0451"="BGM.0451",
 "BGM-0452"="BGM.0452",
-"BGM-0452-1"="BGM.0452.1",
 "BGM-0456"="BGM.0456",
 "BGM-0460"="BGM.0460",
 "BGM-0461"="BGM.0461",
 "BGM-0462"="BGM.0462",
 "BGM-0463"="BGM.0463",
-"BGM-0463/0780"="BR.20.DArT.PL22_F10...BGM.0463.0780",
 "BGM-0464"="BGM.0464",
 "BGM-0465"="BGM.0465",
 "BGM-0467"="BGM.0467",
@@ -2031,7 +2033,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0607"="BGM.0607",
 "BGM-0609"="BGM.0609",
 "BGM-0611"="BGM.0611",
-"BGM-06111"="BGM.06111",
 "BGM-0614"="BGM.0614",
 "BGM-0615"="BGM.0615",
 "BGM-0618"="BGM.0618",
@@ -2095,8 +2096,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0778"="BGM.0778",
 "BGM-0779"="BGM.0779",
 "BGM-0780"="BGM.0780",
-"BGM-0780-B"="BGM.0780.B.",
-"BGM-0780-E"="BGM.0780.E.",
 "BGM-0781"="BGM.0781",
 "BGM-0783"="BGM.0783",
 "BGM-0785"="BGM.0785",
@@ -2172,7 +2171,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-0929"="BGM.0929.",
 "BGM-0930"="BGM.0930",
 "BGM-0931"="BGM.0931",
-"BGM-0931-T"="BR.20.DArT.PL22_B11...BGM.0931.T",
 "BGM-0933"="BR.22.DArT.PL22_G05...BGM.0933",
 "BGM-0934"="BGM.0934",
 "BGM-0935"="BGM.0935",
@@ -2330,8 +2328,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-1255"="BGM.1255",
 "BGM-1259"="BGM.1259",
 "BGM-1262"="BGM.1262",
-"BGM-1262-C"="BGM.1262C",
-"BGM-1262-E"="BGM.1262E",
 "BGM-1263"="BGM.1263",
 "BGM-1265"="BGM.1265",
 "BGM-1267"="BGM.1267",
@@ -2447,7 +2443,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-1498"="BGM.1498",
 "BGM-1499"="BGM.1499",
 "BGM-1502"="BGM.1502",
-"BGM-1502-M"="BGM.1502.M.",
 "BGM-1503"="BGM.1503",
 "BGM-1507"="BGM.1507",
 "BGM-1508"="BGM.1508",
@@ -2555,7 +2550,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-1718"="BGM.1718",
 "BGM-1721"="BGM.1721",
 "BGM-1722"="BGM.1722",
-"BGM-1722-D"="BGM.1722.D.",
 "BGM-1723"="BGM.1723",
 "BGM-1725"="BGM.1725",
 "BGM-1726"="BGM.1726",
@@ -2584,7 +2578,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "BGM-1756"="BGM.1756",
 "BGM-1757"="BGM.1757",
 "BGM-1759"="BGM.1759",
-"BGM-1759-B"="BGM.1759.B.",
 "BGM-1760"="BR.SET1.18.BGM.1760.1.182",
 "BGM-1761"="BGM.1761",
 "BGM-1762"="BGM.1762",
@@ -8862,7 +8855,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "CL-Acre"="CL.Acre",
 "CL-Rangel"="CL.Rangel",
 "Conquista-1"="Conquista.1",
-"Conquista-2"="Conquista.2",
 "CPAFRO-03"="CPAFRO.03",
 "CPAFRO-04"="CPAFRO.04",
 "CPAFRO-05"="CPAFRO.05",
@@ -8948,7 +8940,6 @@ blups$blups[[i]]$germplasmName <- blups$blups[[i]]$germplasmName%>%             
 "TMS 96/1089A"="BR.22.DArT.PL22_D08...TME.96",
 "TZ-130"="BR.22.DArT.PL22_C08...TZ.130",
 "Uberlandia-2"="Uberlandia.2",
-"Uberlandia-3"="Uberlandia.3",
 "Vassourinha-branca"="Vassourinha.branca",
 "Vassourinha-CCAufes"="Vassourinha.CCAufes."))
 }
@@ -8996,21 +8987,26 @@ blups %>%
 #
 ########
 ```{r}
-y_DMCg=DMCg_BLUP$BLUP
+#y_DMCg=DMCg_BLUP$BLUP
 
-breaks_DMCg= pretty(range(y_DMCg), n = nclass.FD(y_DMCg), min.n = 1)
-bwidth_DMCg= breaks_DMCg[2]-breaks_DMCg[1]
-bwidth_DMCg
+#breaks_DMCg= pretty(range(y_DMCg), n = nclass.FD(y_DMCg), min.n = 1)
+#bwidth_DMCg= breaks_DMCg[2]-breaks_DMCg[1]
+#bwidth_DMCg
 
-A=ggplot(DMCg_BLUP, aes(x=BLUP),na.rm=TRUE) +
-    geom_histogram(binwidth=bwidth_DMCg, alpha=1, fill="darkblue",position="identity",na.rm=TRUE,colour="black")+
+#Add overal mean to BLUP
+DMCg_BLUP$BLUP1 <- DMCg_BLUP$BLUP+35.07
+
+A=ggplot(DMCg_BLUP, aes(x=BLUP1),na.rm=TRUE) +
+  geom_density(color="darkblue", fill="lightblue")+
+    #geom_histogram(binwidth=bwidth_DMCg, alpha=1, fill="darkblue",position="identity",na.rm=TRUE,colour="black")+
     #xlim(1000,10000) +
     #xlab('DMCg') +
-    scale_x_continuous(limits=c(-10,6),breaks = c(-10,-8,-6,-4,-2,0,2,4,6))+
-    scale_y_continuous(limits=c(0,200),breaks = c(0,50,100,150,200,250,300,350,400))+
-    labs(title="DMCg",x="BLUP", y = "Density")+
+   # scale_x_continuous(limits=c(-10,6),breaks = c(-10,-8,-6,-4,-2,0,2,4,6))+
+    scale_y_continuous(limits=c(0,0.3),breaks = c(0,0.05, 0.1,0.15,0.2,0.25,0.3,0.35,0.4))+
+    labs(x="DMCg (%)", y = "Density")+
     theme_update(plot.title = element_text(hjust = 0.5))+
-    ylab('Frequency') +
+    #ylab('Frequency') +
+  geom_vline(aes(xintercept=mean(BLUP1)),color="blue", linetype="dashed",linewidth=1)+
     theme(strip.text = element_text(hjust = -0, size=12,family="serif"))+
        theme(axis.text.x = element_text(color="black",size=12,family="serif"))+
        theme(axis.text.y = element_text(color="black",size=12,family="serif"))+
@@ -9034,21 +9030,27 @@ A
 #
 ########
 ```{r}
-y_CWLSD=CWLSD_BLUP$BLUP
+#y_CWLSD=CWLSD_BLUP$BLUP
 
-breaks_CWLSD= pretty(range(y_CWLSD), n = nclass.FD(y_CWLSD), min.n = 1)
-bwidth_CWLSD= breaks_CWLSD[2]-breaks_CWLSD[1]
-bwidth_CWLSD
+#breaks_CWLSD= pretty(range(y_CWLSD), n = nclass.FD(y_CWLSD), min.n = 1)
+#bwidth_CWLSD= breaks_CWLSD[2]-breaks_CWLSD[1]
+#bwidth_CWLSD
 
-B=ggplot(CWLSD_BLUP, aes(x=BLUP),na.rm=TRUE) +
-  geom_histogram(binwidth=bwidth_CWLSD, alpha=1, fill="firebrick",position="identity",na.rm=TRUE,colour="black")+
+#Add overal mean to BLUP
+CWLSD_BLUP$BLUP1 <- CWLSD_BLUP$BLUP+0.9541
+
+
+B=ggplot(CWLSD_BLUP, aes(x=BLUP1),na.rm=TRUE) +
+  geom_density(color="firebrick", fill="lightpink")+
+  geom_vline(aes(xintercept=mean(BLUP1)),color="firebrick", linetype="dashed",linewidth=1)+
+#  geom_histogram(binwidth=bwidth_CWLSD, alpha=1, fill="firebrick",position="identity",na.rm=TRUE,colour="black")+
   #xlim(1000,10000) +
   #xlab('CWLSD') +
-  scale_x_continuous(limits=c(-0.5,0.5),breaks = c(-.5,-.3,-.1,.1,.3,.5))+
-  scale_y_continuous(limits=c(0,350),breaks = c(0,50,100,150,200,250,300,350))+
-  labs(title="CWLSD",x="BLUP", y = "Density")+
+  scale_x_continuous(limits=c(0.5,1.5),breaks = c(0.25,0.50,0.75,1,1.25,1.50))+
+  scale_y_continuous(limits=c(0,6.1),breaks = c(0,1,2,3,4,5,6))+
+  labs(x="CWLSD (score)", y = "Density")+
   theme_update(plot.title = element_text(hjust = 0.5))+
-  ylab('Frequency') +
+  #ylab('Frequency') +
   theme(strip.text = element_text(hjust = -0, size=12,family="serif"))+
   theme(axis.text.x = element_text(color="black",size=12,family="serif"))+
   theme(axis.text.y = element_text(color="black",size=12,family="serif"))+
@@ -9072,21 +9074,26 @@ B
 #
 ########
 ```{r}
-y_CBroLS=CBroLS_BLUP$BLUP
+#y_CBroLS=CBroLS_BLUP$BLUP
 
-breaks_CBroLS= pretty(range(y_CBroLS), n = nclass.FD(y_CBroLS), min.n = 1)
-bwidth_CBroLS= breaks_CBroLS[2]-breaks_CBroLS[1]
-bwidth_CBroLS
+#breaks_CBroLS= pretty(range(y_CBroLS), n = nclass.FD(y_CBroLS), min.n = 1)
+#bwidth_CBroLS= breaks_CBroLS[2]-breaks_CBroLS[1]
+#bwidth_CBroLS
 
-C=ggplot(CBroLS_BLUP, aes(x=BLUP),na.rm=TRUE) +
-  geom_histogram(binwidth=bwidth_CBroLS, alpha=1, fill="chartreuse4",position="identity",na.rm=TRUE,colour="black")+
+#Add overal mean to BLUP
+CBroLS_BLUP$BLUP1 <- CBroLS_BLUP$BLUP+1.882
+
+C=ggplot(CBroLS_BLUP, aes(x=BLUP1),na.rm=TRUE) +
+#  geom_histogram(binwidth=bwidth_CBroLS, alpha=1, fill="chartreuse4",position="identity",na.rm=TRUE,colour="black")+
+  geom_density(color="chartreuse4", fill="lightgreen")+
+  geom_vline(aes(xintercept=mean(BLUP1)),color="chartreuse4", linetype="dashed",linewidth=1)+
   #xlim(1000,10000) +
   #xlab('CBroLS') +
-  scale_x_continuous(limits=c(-0.2,0.2),breaks = c(-0.2,-0.1,0,0.1,0.2))+
-  scale_y_continuous(limits=c(0,350),breaks = c(0,50,100,150,200,250,300,350))+
-  labs(title="CBroLS",x="BLUP", y = "Density")+
+ # scale_x_continuous(limits=c(-0.2,0.2),breaks = c(-0.2,-0.1,0,0.1,0.2))+
+  #scale_y_continuous(limits=c(0,350),breaks = c(0,50,100,150,200,250,300,350))+
+  labs(x="CBroLS (score)", y = "Density")+
   theme_update(plot.title = element_text(hjust = 0.5))+
-  ylab('Frequency') +
+  #ylab('Frequency') +
   theme(strip.text = element_text(hjust = -0, size=12,family="serif"))+
   theme(axis.text.x = element_text(color="black",size=12,family="serif"))+
   theme(axis.text.y = element_text(color="black",size=12,family="serif"))+
@@ -9109,21 +9116,28 @@ C
 #
 ########
 ```{r}
-y_CBliLS=CBliLS_BLUP$BLUP
+#y_CBliLS=CBliLS_BLUP$BLUP
 
-breaks_CBliLS= pretty(range(y_CBliLS), n = nclass.FD(y_CBliLS), min.n = 1)
-bwidth_CBliLS= breaks_CBliLS[2]-breaks_CBliLS[1]
-bwidth_CBliLS
+#breaks_CBliLS= pretty(range(y_CBliLS), n = nclass.FD(y_CBliLS), min.n = 1)
+#bwidth_CBliLS= breaks_CBliLS[2]-breaks_CBliLS[1]
+#bwidth_CBliLS
 
-D=ggplot(CBliLS_BLUP, aes(x=BLUP),na.rm=TRUE) +
-  geom_histogram(binwidth=bwidth_CBliLS, alpha=1, fill="darkturquoise",position="identity",na.rm=TRUE,colour="black")+
+
+#Add overal mean to BLUP
+CBliLS_BLUP$BLUP1 <- CBliLS_BLUP$BLUP+1.952
+
+
+D=ggplot(CBliLS_BLUP, aes(x=BLUP1),na.rm=TRUE) +
+  #geom_histogram(binwidth=bwidth_CBliLS, alpha=1, fill="darkturquoise",position="identity",na.rm=TRUE,colour="black")+
+  geom_density(color="darkturquoise", fill="turquoise")+
+  geom_vline(aes(xintercept=mean(BLUP1)),color="darkturquoise", linetype="dashed",linewidth=1)+
   #xlim(1000,10000) +
   #xlab('CBliLS') +
-  scale_x_continuous(limits=c(-0.15,0.15),breaks = c(-0.1,-0.15,-0.05,0,0.1,0.05,0.15))+
-  scale_y_continuous(limits=c(0,210),breaks = c(0,50,100,150,200,250,300,350,400))+
-  labs(title="CBliLS",x="BLUP", y = "Density")+
+  scale_x_continuous(limits=c(1.75,2.1),breaks = c(1.75,1.8,1.85,1.9,1.95,2,2.05,2.1))+
+  scale_y_continuous(limits=c(0,31),breaks = c(0,5,10,15,20,25,30))+
+  labs(x="CBliLS (score)", y = "Density")+
   theme_update(plot.title = element_text(hjust = 0.5))+
-  ylab('Frequency') +
+  #ylab('Frequency') +
   theme(strip.text = element_text(hjust = -0, size=12,family="serif"))+
   theme(axis.text.x = element_text(color="black",size=12,family="serif"))+
   theme(axis.text.y = element_text(color="black",size=12,family="serif"))+
@@ -9147,21 +9161,28 @@ D
 #
 ########
 ```{r}
-y_StC=StC_BLUP$BLUP
+#y_StC=StC_BLUP$BLUP
 
-breaks_StC= pretty(range(y_StC), n = nclass.FD(y_StC), min.n = 1)
-bwidth_StC= breaks_StC[2]-breaks_StC[1]
-bwidth_StC
+#breaks_StC= pretty(range(y_StC), n = nclass.FD(y_StC), min.n = 1)
+#bwidth_StC= breaks_StC[2]-breaks_StC[1]
+#bwidth_StC
 
-E=ggplot(StC_BLUP, aes(x=BLUP),na.rm=TRUE) +
-  geom_histogram(binwidth=bwidth_StC, alpha=0.90, fill="#E69F00",position="identity",na.rm=TRUE,colour="black")+
+
+#Add overal mean to BLUP
+StC_BLUP$BLUP1 <- StC_BLUP$BLUP+22.67
+
+
+E=ggplot(StC_BLUP, aes(x=BLUP1),na.rm=TRUE) +
+  #geom_histogram(binwidth=bwidth_StC, alpha=0.90, fill="#E69F00",position="identity",na.rm=TRUE,colour="black")+
+  geom_density(color="#E69F00", fill="gold1")+
+  geom_vline(aes(xintercept=mean(BLUP1)),color="#E69F00", linetype="dashed",linewidth=1)+
   #xlim(1000,10000) +
   #xlab('StC') +
-  scale_x_continuous(limits=c(-6,4),breaks = c(-6,-5,-4,-3,-2,-1,0,1,2,3,4))+
-  scale_y_continuous(limits=c(0,110),breaks = c(0,25,50,75,100,125,150,200))+
-  labs(title="StC",x="BLUP", y = "Density")+
+  #scale_x_continuous(limits=c(-6,4),breaks = c(-6,-5,-4,-3,-2,-1,0,1,2,3,4))+
+  scale_y_continuous(limits=c(0,0.4),breaks = c(0,0.05, 0.1,0.15,0.2,0.25,0.3,0.35,0.4))+
+  labs(x="StC (%)", y = "Density")+
   theme_update(plot.title = element_text(hjust = 0.5))+
-  ylab('Frequency') +
+  #ylab('Frequency') +
   theme(strip.text = element_text(hjust = -0, size=12,family="serif"))+
   theme(axis.text.x = element_text(color="black",size=12,family="serif"))+
   theme(axis.text.y = element_text(color="black",size=12,family="serif"))+
@@ -9184,21 +9205,27 @@ E
 #
 ########
 ```{r}
-y_PA=PA_BLUP$BLUP
+#y_PA=PA_BLUP$BLUP
 
-breaks_PA= pretty(range(y_PA), n = nclass.FD(y_PA), min.n = 1)
-bwidth_PA= breaks_PA[2]-breaks_PA[1]
-bwidth_PA
+#breaks_PA= pretty(range(y_PA), n = nclass.FD(y_PA), min.n = 1)
+#bwidth_PA= breaks_PA[2]-breaks_PA[1]
+#bwidth_PA
 
-G=ggplot(PA_BLUP, aes(x=BLUP),na.rm=TRUE) +
-  geom_histogram(binwidth=bwidth_PA, alpha=0.90, fill="#FC4E07",position="identity",na.rm=TRUE,colour="black")+
+#Add overal mean to BLUP
+PA_BLUP$BLUP1 <- PA_BLUP$BLUP+3.096
+
+
+G=ggplot(PA_BLUP, aes(x=BLUP1),na.rm=TRUE) +
+  #geom_histogram(binwidth=bwidth_PA, alpha=0.90, fill="#FC4E07",position="identity",na.rm=TRUE,colour="black")+
+   geom_density(color="#FC4E07", fill="coral")+
+  geom_vline(aes(xintercept=mean(BLUP1)),color="#FC4E07", linetype="dashed",linewidth=1)+
   #xlim(1000,10000) +
   #xlab('PA') +
-  scale_x_continuous(limits=c(-2,2),breaks = c(-3,-2,-1,0,1,2))+
-  scale_y_continuous(limits=c(0,300),breaks = c(0,50,100,150,200,250,300,350,400))+
-  labs(title="PA",x="BLUP", y = "Density")+
+  #scale_x_continuous(limits=c(-2,2),breaks = c(-3,-2,-1,0,1,2))+
+  scale_y_continuous(limits=c(0,1.5),breaks = c(0,0.25,0.5,0.75,1,1.25,1.5,1.75,2,3))+
+  labs(x="PA (score)", y = "Density")+
   theme_update(plot.title = element_text(hjust = 0.5))+
-  ylab('Frequency') +
+  #ylab('Frequency') +
   theme(strip.text = element_text(hjust = -0, size=12,family="serif"))+
   theme(axis.text.x = element_text(color="black",size=12,family="serif"))+
   theme(axis.text.y = element_text(color="black",size=12,family="serif"))+
@@ -9222,21 +9249,29 @@ G
 #
 ########
 ```{r}
-y_logFRY=logFRY_BLUP$BLUP
+#y_logFRY=logFRY_BLUP$BLUP
 
-breaks_logFRY= pretty(range(y_logFRY), n = nclass.FD(y_logFRY), min.n = 1)
-bwidth_logFRY= breaks_logFRY[2]-breaks_logFRY[1]
-bwidth_logFRY
+#breaks_logFRY= pretty(range(y_logFRY), n = nclass.FD(y_logFRY), min.n = 1)
+#bwidth_logFRY= breaks_logFRY[2]-breaks_logFRY[1]
+#bwidth_logFRY
 
-H=ggplot(logFRY_BLUP, aes(x=BLUP),na.rm=TRUE) +
-  geom_histogram(binwidth=bwidth_logFRY, alpha=1, fill="mediumvioletred",position="identity",na.rm=TRUE,colour="black")+
+
+#Add overal mean to BLUP
+logFRY_BLUP$BLUP1 <- logFRY_BLUP$BLUP+2.686
+
+
+H=ggplot(logFRY_BLUP, aes(x=BLUP1),na.rm=TRUE) +
+  #geom_histogram(binwidth=bwidth_logFRY, alpha=1, fill="mediumvioletred",position="identity",na.rm=TRUE,colour="black")+
+  geom_density(color="mediumvioletred", fill="magenta")+
+  geom_vline(aes(xintercept=mean(BLUP1)),color="mediumvioletred", linetype="dashed",linewidth=1)+
   #xlim(1000,10000) +
   #xlab('logFRY') +
-  scale_x_continuous(limits=c(-2,2),breaks = c(-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0,1,2))+
-  scale_y_continuous(limits=c(0,250),breaks = c(0,50,100,150,200,250))+
-  labs(title="logFRY",x="BLUP", y = "Density")+
+  xlab(expression('logFRY'~' (t.ha'^-1~')')) +
+  scale_x_continuous(limits=c(1,4),breaks = c(1,2,3,4))+
+  scale_y_continuous(limits=c(0,1.5),breaks = c(0,0.25,0.50,0.75,1,1.25,1.50))+
+  #labs(x="logFRY", y = "Density")+
   theme_update(plot.title = element_text(hjust = 0.5))+
-  ylab('Frequency') +
+  ylab('Density') +
   theme(strip.text = element_text(hjust = -0, size=12,family="serif"))+
   theme(axis.text.x = element_text(color="black",size=12,family="serif"))+
   theme(axis.text.y = element_text(color="black",size=12,family="serif"))+
@@ -9260,21 +9295,28 @@ H
 #
 ###########
 ```{r}
-y_logFSY=logFSY_BLUP$BLUP
+#y_logFSY=logFSY_BLUP$BLUP
 
-breaks_logFSY= pretty(range(y_logFSY), n = nclass.FD(y_logFSY), min.n = 1)
-bwidth_logFSY= breaks_logFSY[2]-breaks_logFSY[1]
-bwidth_logFSY
+#breaks_logFSY= pretty(range(y_logFSY), n = nclass.FD(y_logFSY), min.n = 1)
+#bwidth_logFSY= breaks_logFSY[2]-breaks_logFSY[1]
+#bwidth_logFSY
 
-I=ggplot(logFSY_BLUP, aes(x=BLUP),na.rm=TRUE) +
-  geom_histogram(binwidth=bwidth_logFSY, alpha=1, fill="#66CC99", position="identity",na.rm=TRUE,colour="black")+
+
+#Add overal mean to BLUP
+logFSY_BLUP$BLUP1 <- logFSY_BLUP$BLUP+2.8643
+
+
+I=ggplot(logFSY_BLUP, aes(x=BLUP1),na.rm=TRUE) +
+  #geom_histogram(binwidth=bwidth_logFSY, alpha=1, fill="#66CC99", position="identity",na.rm=TRUE,colour="black")+
+  geom_density(color="#66CC99", fill="palegreen1")+
+  geom_vline(aes(xintercept=mean(BLUP1)),color="#66CC99", linetype="dashed",linewidth=1)+
   #xlim(1000,10000) +
-  #xlab('logFSY') +
-  scale_x_continuous(limits=c(-1.5,1),breaks = c(-2,-1.5,-1,-0.5,0,0.5,1))+
-  scale_y_continuous(limits=c(0,300),breaks = c(0,50,100,150,200,250,300,350,400))+
-  labs(title="logFSY",x="BLUP", y = "Density")+
+  xlab(expression('logFSY'~' (t.ha'^-1~')')) +
+  #scale_x_continuous(limits=c(-1.5,1),breaks = c(-2,-1.5,-1,-0.5,0,0.5,1))+
+  scale_y_continuous(limits=c(0,1.75),breaks = c(0,0.25,0.5,0.75,1,1.25,1.5,1.75,2,3))+
+  #labs(x="logFSY", y = "Density")+
   theme_update(plot.title = element_text(hjust = 0.5))+
-  ylab('Frequency') +
+  ylab('Density') +
   theme(strip.text = element_text(hjust = -0, size=12,family="serif"))+
   theme(axis.text.x = element_text(color="black",size=12,family="serif"))+
   theme(axis.text.y = element_text(color="black",size=12,family="serif"))+
@@ -9327,7 +9369,7 @@ comp_var_DMCg=comp_var_DMCg[1:4,]
 comp_var_DMCg=rbind(comp_var_DMCg,error_DMCg)
 comp_var_DMCg=comp_var_DMCg[,-c(1)]
 comp_var_DMCg=as.data.frame(comp_var_DMCg)
-names_par=c("Germplasm","RepInTrial","BlockInRep","Germplasm:yearInLoc","Error")
+names_par=c("Clones","RepInTrial","BlockInRep","Clones:yearInLoc","Error")
 comp_var_DMCg=as.data.frame(cbind(names_par,comp_var_DMCg))
 comp_var_DMCg$name="DMCg"
 colnames(comp_var_DMCg)=c("group", "value","name")
@@ -9339,7 +9381,7 @@ comp_var_CWLSD=comp_var_CWLSD[1:4,]
 comp_var_CWLSD=rbind(comp_var_CWLSD,error_CWLSD)
 comp_var_CWLSD=comp_var_CWLSD[,-c(1)]
 comp_var_CWLSD=as.data.frame(comp_var_CWLSD)
-names_par=c("Germplasm","RepInTrial","BlockInRep","Germplasm:yearInLoc","Error")
+names_par=c("Clones","RepInTrial","BlockInRep","Clones:yearInLoc","Error")
 comp_var_CWLSD=as.data.frame(cbind(names_par,comp_var_CWLSD))
 comp_var_CWLSD$name="CWLSD"
 colnames(comp_var_CWLSD)=c("group", "value","name")
@@ -9351,7 +9393,7 @@ comp_var_CBroLS=comp_var_CBroLS[1:4,]
 comp_var_CBroLS=rbind(comp_var_CBroLS,error_CBroLS)
 comp_var_CBroLS=comp_var_CBroLS[,-c(1)]
 comp_var_CBroLS=as.data.frame(comp_var_CBroLS)
-names_par=c("Germplasm","RepInTrial","BlockInRep","Germplasm:yearInLoc","Error")
+names_par=c("Clones","RepInTrial","BlockInRep","Clones:yearInLoc","Error")
 comp_var_CBroLS=as.data.frame(cbind(names_par,comp_var_CBroLS))
 comp_var_CBroLS$name="CBroLS"
 colnames(comp_var_CBroLS)=c("group", "value","name")
@@ -9364,7 +9406,7 @@ comp_var_CBliLS=comp_var_CBliLS[1:4,]
 comp_var_CBliLS=rbind(comp_var_CBliLS,error_CBliLS)
 comp_var_CBliLS=comp_var_CBliLS[,-c(1)]
 comp_var_CBliLS=as.data.frame(comp_var_CBliLS)
-names_par=c("Germplasm","RepInTrial","BlockInRep","Germplasm:yearInLoc","Error")
+names_par=c("Clones","RepInTrial","BlockInRep","Clones:yearInLoc","Error")
 comp_var_CBliLS=as.data.frame(cbind(names_par,comp_var_CBliLS))
 comp_var_CBliLS$name="CBliLS"
 colnames(comp_var_CBliLS)=c("group", "value","name")
@@ -9376,7 +9418,7 @@ comp_var_StC=comp_var_StC[1:4,]
 comp_var_StC=rbind(comp_var_StC,error_StC)
 comp_var_StC=comp_var_StC[,-c(1)]
 comp_var_StC=as.data.frame(comp_var_StC)
-names_par=c("Germplasm","RepInTrial","BlockInRep","Germplasm:yearInLoc","Error")
+names_par=c("Clones","RepInTrial","BlockInRep","Clones:yearInLoc","Error")
 comp_var_StC=as.data.frame(cbind(names_par,comp_var_StC))
 comp_var_StC$name="StC"
 colnames(comp_var_StC)=c("group", "value","name")
@@ -9388,7 +9430,7 @@ comp_var_PA=comp_var_PA[1:4,]
 comp_var_PA=rbind(comp_var_PA,error_PA)
 comp_var_PA=comp_var_PA[,-c(1)]
 comp_var_PA=as.data.frame(comp_var_PA)
-names_par=c("Germplasm","RepInTrial","BlockInRep","Germplasm:yearInLoc","Error")
+names_par=c("Clones","RepInTrial","BlockInRep","Clones:yearInLoc","Error")
 comp_var_PA=as.data.frame(cbind(names_par,comp_var_PA))
 comp_var_PA$name="PA"
 colnames(comp_var_PA)=c("group", "value","name")
@@ -9401,7 +9443,7 @@ comp_var_logFRY=comp_var_logFRY[1:4,]
 comp_var_logFRY=rbind(comp_var_logFRY,error_logFRY)
 comp_var_logFRY=comp_var_logFRY[,-c(1)]
 comp_var_logFRY=as.data.frame(comp_var_logFRY)
-names_par=c("Germplasm","RepInTrial","BlockInRep","Germplasm:yearInLoc","Error")
+names_par=c("Clones","RepInTrial","BlockInRep","Clones:yearInLoc","Error")
 comp_var_logFRY=as.data.frame(cbind(names_par,comp_var_logFRY))
 comp_var_logFRY$name="logFRY"
 colnames(comp_var_logFRY)=c("group", "value","name")
@@ -9413,7 +9455,7 @@ comp_var_logFSY=comp_var_logFSY[1:4,]
 comp_var_logFSY=rbind(comp_var_logFSY,error_logFSY)
 comp_var_logFSY=comp_var_logFSY[,-c(1)]
 comp_var_logFSY=as.data.frame(comp_var_logFSY)
-names_par=c("Germplasm","RepInTrial","BlockInRep","Germplasm:yearInLoc","Error")
+names_par=c("Clones","RepInTrial","BlockInRep","Clones:yearInLoc","Error")
 comp_var_logFSY=as.data.frame(cbind(names_par,comp_var_logFSY))
 comp_var_logFSY$name="logFSY"
 colnames(comp_var_logFSY)=c("group", "value","name")
@@ -9432,7 +9474,7 @@ tab_comp_var$group=as.factor(tab_comp_var$group)
 tab_comp_var$name=as.factor(tab_comp_var$name)
 tab_comp_var$value=as.numeric(tab_comp_var$value)
 
-tab_comp_var$group= factor(tab_comp_var$group, levels = c('RepInTrial','BlockInRep','Germplasm','Germplasm:yearInLoc','Error'))
+tab_comp_var$group= factor(tab_comp_var$group, levels = c('RepInTrial','BlockInRep','Clones','Clones:yearInLoc','Error'))
 tab_comp_var$name= factor(tab_comp_var$name, levels = c('DMCg','CWLSD','CBroLS','CBliLS','StC','PA', 'logFRY','logFSY'))
 
 figure1= ggplot(tab_comp_var, aes(name, value, fill = group)) +
@@ -9460,7 +9502,15 @@ figure1= ggplot(tab_comp_var, aes(name, value, fill = group)) +
         panel.background = element_rect(fill = "white", colour = "grey80"),
         legend.background = element_blank(),
         legend.title = element_text(colour = "black", size = 12,family="serif"),
-        legend.text = element_text(colour = "black", size = 12,family="serif"))
+        legend.text = element_text(colour = "black", size = 12,family="serif"))+
+  annotate(geom="text", x=1, y=0.55, label = expression('h'^2 ==0.798), color="black", angle=90)+
+  annotate(geom="text", x=2, y=0.55, label = expression('h'^2 ==0.226), color="black", angle=90)+
+  annotate(geom="text", x=3, y=0.55, label = expression('h'^2 ==0.057), color="black",angle=90)+
+  annotate(geom="text", x=4, y=0.55, label = expression('h'^2 ==0.005), color="black", angle=90)+
+  annotate(geom="text", x=5, y=0.55, label = expression('h'^2 ==0.602), color="black", angle=90)+
+  annotate(geom="text", x=6, y=0.55, label = expression('h'^2 ==0.567), color="black", angle=90)+
+  annotate(geom="text", x=7, y=0.55, label = expression('h'^2 ==0.736), color="black", angle=90)+
+  annotate(geom="text", x=8, y=0.55, label = expression('h'^2 ==0.775), color="black", angle=90)
 
 figure1
 ```
