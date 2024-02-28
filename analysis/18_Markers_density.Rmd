@@ -1,0 +1,70 @@
+---
+title: "18_Markers_density"
+author: "Paulo-HR"
+date: "2023-11-07"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+##################
+#
+## Introduction
+#
+#################
+```{r}
+require(CMplot)
+```
+
+###################
+#
+## Dosage matrix
+#
+###################
+```{r}
+dosages<-readRDS(here::here("data","dosages.rds"))
+dosages[1:10,1:10]
+```
+
+
+##################
+#
+## genetic map
+#
+##################
+```{r}
+markers_names<- as.data.frame(colnames(dosages))
+colnames(markers_names)<- c("marker")
+map=markers_names%>%tidyr::separate(marker, c('chr', 'pos', 'ALT', 'REF'))
+map$marker<-colnames(dosages)
+map<-map[c(5,1:2)]
+head(map)
+```
+
+########################
+#
+## Plotando o gráfico
+#
+########################
+```{r}
+CMplot(map,type="p",plot.type="d",bin.size=1e6,chr.den.col=c("#4197d8", "#f8c120", "#413496", "#495226",
+                                                              "#d60b6f", "#e66519", "#d581b7", "#83d3ad",
+                                                              "#7c162c", "#26755d"),
+       chr.pos.max=TRUE,
+       file="jpg",file.name="",dpi=300,
+       main="The number of SNPs within 1 Mb window size",file.output=TRUE,verbose=TRUE,width=9,height=6,)
+```
+
+
+```{r}
+library(rMVP)
+```
+
+```{r}
+MVP.Report(map, plot.type="d", col=c("darkgreen", "yellow", "red"), file="jpg", dpi=300)
+```
+
+```{r}
+MVP.Report.Density()
+```
+
