@@ -1,0 +1,175 @@
+---
+title: "22_AIC_criterion_selection_index"
+author: "Paulo-HR"
+date: "2024-01-10"
+output: workflowr::wflow_html
+editor_options:
+  chunk_output_type: console
+---
+
+
+#####################
+#
+## Introduction
+#
+#####################
+
+#######################
+#
+## Calling packages
+#
+#######################
+```{r}
+library(genomicMateSelectR)
+library(sommer)
+```
+
+##############################
+#
+## Importing phenotype data
+#
+###############################
+```{r}
+blups<-readRDS(here::here("output","blups_fixed_labels.rds"))
+```
+
+####################
+#
+## Kinship matrix
+#
+####################
+```{r}
+## Dominance relationship matrix
+Dclassic<-readRDS(file=here::here("output","kinship_dom_classic.rds"))
+Dclassic<-Dclassic[order(rownames(Dclassic)),order(rownames(Dclassic))]
+dim(Dclassic)
+
+## Dominance relationship matrix
+D<-readRDS(file=here::here("output","kinship_dom.rds"))
+D<-D[order(rownames(D)),order(rownames(D))]
+dim(D)
+
+## Additive relationship matrix
+A<-readRDS(file=here::here("output","kinship_add.rds"))
+A<-A[order(rownames(A)),order(rownames(A))]
+dim(A)
+```
+
+##########################
+#
+## Pull out the traits
+#
+##########################
+```{r}
+DMCg<-blups$blups[[1]];DMCg$drgBLUP <- DMCg$drgBLUP*5;DMCg$WT <- DMCg$WT*5;DMCg <- DMCg[,c(1,2,6)]
+StC <- blups$blups[[5]];StC$drgBLUP <- StC$drgBLUP*10;StC$WT<- StC$WT*10;StC <- StC[,c(1,2,6)]      
+PA <- blups$blups[[6]];PA$drgBLUP <- PA$drgBLUP*(-8);PA$WT <- PA$WT*(-8);PA <- PA[,c(1,2,6)]
+logFRY <-blups$blups[[7]];logFRY$drgBLUP <- logFRY$drgBLUP*10;logFRY$WT <- logFRY$WT*10;logFRY <- logFRY[,c(1,2,6)]
+logFSY <-blups$blups[[8]];logFSY$drgBLUP <-logFSY$drgBLUP *8;logFSY$WT <-logFSY$WT *8;logFSY <- logFSY[,c(1,2,6)]
+
+```
+
+#################################
+#
+## Merging the different traits
+#
+#################################
+```{r}
+data1 <- merge(DMCg, StC, by=c("germplasmName"))
+data2 <- merge(logFRY, logFSY, by=c("germplasmName"))
+data3 <- merge(data1, PA, by=c("germplasmName"))
+data4 <- merge(data2, data3, by=c("germplasmName"))
+```
+
+#####################
+#
+## Final data frame
+#
+#####################
+```{r}
+dm_blups<- as.data.frame(data4$BLUP.x.x+data4$BLUP.y.x+data4$BLUP.x.y+data4$BLUP.y.y+data4$BLUP)
+dm_blups$WT <- data4$WT.x.x+data4$WT.y.x+data4$WT.x.y+data4$WT.y.y+data4$WT
+dm_blups <- cbind(data4$germplasmName,dm_blups)
+colnames (dm_blups) <- c("germplasmName", "drgBLUP", "WT")
+```
+
+##########################################
+#
+## How many matches to Kinship matrix
+#
+##########################################
+```{r}
+# Phenotyped-but-not-genotyped lines
+table(dm_blups$germplasmName %in% rownames(A))
+```
+
+```{r}
+# Genotyped-but-not-phenotyped lines
+table(rownames(A) %in% dm_blups$germplasmName)
+```
+
+
+
+################################################
+#
+## Deleting phenotyped-but-not-genotyped lines
+#
+################################################
+```{r}
+dm_blups %<>% 
+     filter(germplasmName %in% rownames(A))
+```
+
+########################
+#
+## Genomic prediction
+#
+########################
+
+
+###################
+#
+## Additive model
+#
+###################
+```{r}
+gblup_all_A<-mmer(fixed = drgBLUP~1,
+                # here we specify a random-effect for the "germplasmName" variable
+                # and supply the kinship matrix "A" as follows:
+                random = ~vsr(germplasmName,Gu=A),
+                weights = WT,
+                data=dm_blups)
+```
+
+
+########################
+#
+## Non additive model
+#
+########################
+```{r}
+gblup_all_AD<-mmer(fixed = drgBLUP~1,
+                # here we specify a random-effect for the "germplasmName" variable
+                # and supply the kinship matrix "A" as follows:
+                random = ~vsr(germplasmName,Gu=A)+
+                          vsr(germplasmName,Gu=Dclassic),
+                weights = WT,
+                data=dm_blups)
+```
+
+
+#################################
+#
+## Directional dominance model
+#
+#################################
+```{r}
+gblup_all_DirDom<-mmer(fixed = drgBLUP~1,
+                # here we specify a random-effect for the "germplasmName" variable
+                # and supply the kinship matrix "A" as follows:
+                random = ~vsr(germplasmName,Gu=A)+
+                          vsr(germplasmName,Gu=D),
+                weights = WT,
+                data=dm_blups)
+```
+
